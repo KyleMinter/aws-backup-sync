@@ -50,6 +50,8 @@
   "author": "Kyle Minter",
   "license": "MIT",
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.722.0",
+    "electron-store": "^8.2.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },

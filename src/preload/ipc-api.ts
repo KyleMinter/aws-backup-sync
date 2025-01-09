@@ -6,4 +6,12 @@ function rendererReady() {
   ipcRenderer.send('renderer-ready');
 }
 
-export default { rendererReady };
+async function storeGet(key: string): Promise<any> {
+  return await ipcRenderer.invoke('store:get', key);
+}
+
+async function storeSet(key: string, value: any) {
+  ipcRenderer.send('store:set', key, value);
+}
+
+export default { rendererReady, storeGet, storeSet };

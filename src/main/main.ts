@@ -1,10 +1,8 @@
-/**
- * Entry point of the Election app.
- */
 import * as path from 'path';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { BrowserWindow, Tray, Menu, nativeImage, screen, app, ipcMain } from 'electron';
 import * as nodeEnv from '_utils/node-env';
+import { getStore, setStore } from './store';
 
 let singleInstanceLock: boolean;
 let tray: Electron.Tray | undefined;
@@ -97,7 +95,7 @@ app.whenReady().then(() => {
   singleInstanceLock = app.requestSingleInstanceLock();
   if (!singleInstanceLock)
       handleQuit();
-  
+
   // Create the tray and docked window.
   createDockedWindow();
   createTray();
@@ -115,6 +113,10 @@ app.on('second-instance', () => {
 function handleQuit() {
   app.quit();
 }
+
+// IPC handles for store related functions
+ipcMain.handle('store:get', getStore);
+ipcMain.on('store:set', setStore)
 
 ipcMain.on('renderer-ready', () => {
   // eslint-disable-next-line no-console
