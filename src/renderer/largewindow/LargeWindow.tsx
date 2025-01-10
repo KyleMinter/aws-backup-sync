@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-function App(): JSX.Element {
+function LargeWindow(): JSX.Element {
   const [storeValue, setStoreValue] = useState('');
   const [inputValue, setInputValue] = useState('');
 
@@ -18,7 +18,7 @@ function App(): JSX.Element {
 
   return (
     <div className="app">
-      <h4>Welcome to React, Electron and TypeScript</h4>
+      <h4>LARGE WINDOW</h4>
       <p>Hello</p>
       <input type='text' value={inputValue} onChange={handleChange} />
       <p>Saved value: {storeValue}</p>
@@ -26,4 +26,4 @@ function App(): JSX.Element {
   );
 }
 
-export default App;
+export default LargeWindow;

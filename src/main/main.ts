@@ -7,6 +7,7 @@ import { getStore, setStore } from './store';
 let singleInstanceLock: boolean;
 let tray: Electron.Tray | undefined;
 let dockedWindow: Electron.BrowserWindow | undefined;
+let largeWindow: Electron.BrowserWindow | undefined;
 
 /**
  * Creates the tray icon for the application.
@@ -25,6 +26,32 @@ const createTray = () => {
 
   // Toggle the docked window when the tray icon is clicked.
   tray.on('click', toggleDockedWindow);
+}
+
+function createLargeWindow() {
+
+  // The desired size of the docked window.
+  const windowWidth = 800;
+  const windowHeight = 600;
+  
+  largeWindow = new BrowserWindow({
+    width: windowWidth,
+    height: windowHeight,
+    show: true,
+    frame: true,
+    fullscreenable: false,
+    resizable: false,
+    movable: true,
+    transparent: false,
+    webPreferences: {
+      devTools: nodeEnv.dev,
+      preload: path.join(__dirname, './preload.bundle.js'),
+      webSecurity: nodeEnv.prod,
+    },
+  });
+
+  // and load the index.html of the app.
+  largeWindow.loadFile('largewindow.html');
 }
 
 /**
@@ -60,7 +87,7 @@ function createDockedWindow() {
   });
 
   // and load the index.html of the app.
-  dockedWindow.loadFile('index.html');
+  dockedWindow.loadFile('dockedwindow.html');
 
   // Hide the window when it loses focus.
   dockedWindow.on('blur', () => {
@@ -98,6 +125,7 @@ app.whenReady().then(() => {
 
   // Create the tray and docked window.
   createDockedWindow();
+  createLargeWindow();
   createTray();
 });
 

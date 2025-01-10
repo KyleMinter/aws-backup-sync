@@ -92,12 +92,22 @@ const preloadConfig = merge(commonConfig, {
 });
 
 const rendererConfig = merge(commonConfig, {
-  entry: './src/renderer/renderer.tsx',
+  entry: {
+    dockedwindow: './src/renderer/dockedwindow/renderer.tsx',
+    largewindow: './src/renderer/largewindow/renderer.tsx'
+  },
   target: 'electron-renderer',
-  output: { filename: 'renderer.bundle.js' },
+  output: { filename: '[name].js' },
   plugins: [
     new HtmlWebpackPlugin({
+      filename: 'dockedwindow.html',
       template: path.resolve(__dirname, './public/index.html'),
+      chunks: ['dockedwindow'],
+    }),
+    new HtmlWebpackPlugin({
+      filename: 'largewindow.html',
+      template: path.resolve(__dirname, './public/index.html'),
+      chunks: ['largewindow'],
     }),
   ],
 });
