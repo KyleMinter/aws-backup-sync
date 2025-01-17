@@ -1,27 +1,37 @@
 import React, { useEffect, useState } from 'react';
+import Navbar from './Navbar';
+import Folders from './Folders';
 
 function LargeWindow(): JSX.Element {
-  const [storeValue, setStoreValue] = useState('');
-  const [inputValue, setInputValue] = useState('');
-
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValue(event.target.value);
-    window.ipcAPI?.storeSet('watch_path', event.target.value);
-    window.ipcAPI!.storeGet('watch_path').then(res => {
-      setStoreValue(res);
-    })
-  }
-  
   useEffect(() => {
     window.ipcAPI?.rendererReady();
   }, []);
 
+  const [activePage, setActive] = useState('folders');
+
+  let pageContent;
+  switch (activePage) {
+    case 'About':
+      pageContent = <h2>About</h2>
+      break;
+    case 'General':
+      pageContent = <h2>General</h2>
+      break;
+    case 'Folders':
+      pageContent = <Folders />
+      break;
+    case 'Transfers':
+      pageContent = <h2>Transfers</h2>
+      break;
+    default:
+      pageContent = <h2>About</h2>
+  }
+
   return (
     <div className="app">
-      <h4>LARGE WINDOW</h4>
-      <p>Hello</p>
-      <input type='text' value={inputValue} onChange={handleChange} />
-      <p>Saved value: {storeValue}</p>
+      <h2>large window</h2>
+      <Navbar active={activePage} handler={setActive} />
+      {pageContent}
     </div>
   );
 }

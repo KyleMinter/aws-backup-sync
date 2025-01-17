@@ -2,7 +2,8 @@ import * as path from 'path';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { BrowserWindow, Tray, Menu, nativeImage, screen, app, ipcMain } from 'electron';
 import * as nodeEnv from '_utils/node-env';
-import { getStore, setStore } from './store';
+import { getStore, setStore, getAllWatchersFromStore } from './store';
+import Watcher, { addWatcherInstance, removeWatcherInstance, toggleWatcherInstance } from './watcher';
 
 let singleInstanceLock: boolean;
 let tray: Electron.Tray | undefined;
@@ -29,20 +30,25 @@ const createTray = () => {
 }
 
 function createLargeWindow() {
+  // Get the size of the display so we can size the window accordingly.
+  const display = screen.getPrimaryDisplay();
+  const displayWidth = display.bounds.width;
+  const displayHeight = display.bounds.height;
 
-  // The desired size of the docked window.
-  const windowWidth = 800;
-  const windowHeight = 600;
+  // The desired size of the large window in relation to the screen size.
+  const windowWidth = .60;
+  const windowHeight = .75;
   
   largeWindow = new BrowserWindow({
-    width: windowWidth,
-    height: windowHeight,
+    width: displayWidth * windowWidth,
+    height: displayHeight * windowHeight,
     show: true,
     frame: true,
     fullscreenable: false,
     resizable: false,
     movable: true,
     transparent: false,
+    autoHideMenuBar: true,
     webPreferences: {
       devTools: nodeEnv.dev,
       preload: path.join(__dirname, './preload.bundle.js'),
@@ -79,6 +85,7 @@ function createDockedWindow() {
     resizable: false,
     movable: false,
     transparent: false,
+    skipTaskbar: true,
     webPreferences: {
       devTools: nodeEnv.dev,
       preload: path.join(__dirname, './preload.bundle.js'),
@@ -145,6 +152,15 @@ function handleQuit() {
 // IPC handles for store related functions
 ipcMain.handle('store:get', getStore);
 ipcMain.on('store:set', setStore)
+
+ipcMain.on('watcher:add', addWatcherInstance);
+ipcMain.on('watcher:remove', removeWatcherInstance);
+ipcMain.on('watcher:toggle', (event, instance: Watcher) => {
+  toggleWatcherInstance(instance);
+});
+ipcMain.handle('watcher:getAll', () => {
+  return getAllWatchersFromStore();
+});
 
 ipcMain.on('renderer-ready', () => {
   // eslint-disable-next-line no-console
