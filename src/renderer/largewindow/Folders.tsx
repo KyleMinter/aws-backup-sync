@@ -4,17 +4,20 @@ import Watcher from '_main/watcher';
 function Folders(): JSX.Element {
     const [list, setList] = useState<Watcher[]>([]);
 
-    useEffect(() => {
-        async function fetchWatcherList() {
-            const watchers = await window.ipcAPI?.getAllWatchers();
-            if (watchers !== undefined)
-            {
-                setList(watchers);
-            }
+    async function fetchWatcherList() {
+        const watchers = await window.ipcAPI?.getAllWatchers();
+        if (watchers !== undefined)
+        {
+            setList(watchers);
         }
+    }
 
+    function handleChange(watcher: Watcher) {
+        window.ipcAPI?.toggleWatcherInstance(watcher);
         fetchWatcherList();
-    }, []);
+    }
+
+    fetchWatcherList();
 
 
     return (
@@ -22,7 +25,7 @@ function Folders(): JSX.Element {
             <h4>Synced Folders</h4>
             <ul>
                 {list.map((key) => (
-                    <li><FolderWatcher watcher={key} /></li>
+                    <li><FolderWatcher watcher={key} handler={handleChange} /></li>
                 ))}
             </ul>
         </div>
@@ -30,13 +33,14 @@ function Folders(): JSX.Element {
 }
 
 interface FolderWatcherProps {
-    watcher: Watcher
+    watcher: Watcher;
+    handler: any;
 }
 
 function FolderWatcher(props: FolderWatcherProps): JSX.Element {
     return (
-        <div className="">
-            <input type="checkbox" checked={props.watcher.enabled} onChange={() => window.ipcAPI?.toggleWatcherInstance(props.watcher)} />
+        <div className="folder-watcher">
+            <input type="checkbox" checked={props.watcher.enabled} onChange={() => props.handler(props.watcher)} />
             <p>{props.watcher.name}</p>
             <p>{props.watcher.filepath}</p>
         </div>

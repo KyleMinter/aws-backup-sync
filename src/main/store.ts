@@ -104,6 +104,7 @@ export function updateWatcherInStore(watcher: Watcher) {
             element.enabled = watcher.enabled;
         }
     })
+    store.set('watchers', watchersList);
 }
 
 export function getAllWatchersFromStore(): Watcher[] {
