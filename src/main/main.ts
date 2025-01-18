@@ -153,8 +153,12 @@ function handleQuit() {
 ipcMain.handle('store:get', getStore);
 ipcMain.on('store:set', setStore)
 
-ipcMain.on('watcher:add', addWatcherInstance);
-ipcMain.on('watcher:remove', removeWatcherInstance);
+ipcMain.on('watcher:add', (event, instance: Watcher) => {
+  addWatcherInstance(instance);
+});
+ipcMain.on('watcher:remove', (event, instance: Watcher) => {
+  removeWatcherInstance(instance);
+});
 ipcMain.on('watcher:toggle', (event, instance: Watcher) => {
   toggleWatcherInstance(instance);
 });

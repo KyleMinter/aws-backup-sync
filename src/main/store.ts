@@ -94,6 +94,7 @@ export function removeWatcherFromStore(watcher: Watcher) {
     if (index > -1) {
         watchersList.splice(index, 1);
     }
+    store.set('watchers', watchersList);
 }
 
 export function updateWatcherInStore(watcher: Watcher) {

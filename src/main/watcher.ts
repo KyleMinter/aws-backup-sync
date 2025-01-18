@@ -1,4 +1,3 @@
-import { IpcMainInvokeEvent } from 'electron';
 import chokidar from 'chokidar';
 import { addWatcherToStore, removeWatcherFromStore, updateWatcherInStore, getAllWatchersFromStore } from "./store";
 
@@ -30,12 +29,12 @@ watcher.on('all', (path) => {
     console.log(path);
 });
 
-export function addWatcherInstance(event: IpcMainInvokeEvent, instance: Watcher): void {
+export function addWatcherInstance(instance: Watcher): void {
     addWatcherToStore(instance);
     watcher.add(instance.filepath);
 }
 
-export function removeWatcherInstance(event: IpcMainInvokeEvent, instance: Watcher): void {
+export function removeWatcherInstance(instance: Watcher): void {
     removeWatcherFromStore(instance);
     watcher.unwatch(instance.filepath);
 }
