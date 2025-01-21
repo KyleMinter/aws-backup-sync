@@ -31,7 +31,8 @@ watcher.on('all', (path) => {
 
 export function addWatcherInstance(instance: Watcher): void {
     addWatcherToStore(instance);
-    watcher.add(instance.filepath);
+    if (instance.enabled)
+        watcher.add(instance.filepath);
 }
 
 export function removeWatcherInstance(instance: Watcher): void {

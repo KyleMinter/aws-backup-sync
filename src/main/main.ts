@@ -1,6 +1,6 @@
 import * as path from 'path';
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { BrowserWindow, Tray, Menu, nativeImage, screen, app, ipcMain } from 'electron';
+import { BrowserWindow, Tray, Menu, nativeImage, screen, app, ipcMain, dialog } from 'electron';
 import * as nodeEnv from '_utils/node-env';
 import { getStore, setStore, getAllWatchersFromStore } from './store';
 import Watcher, { addWatcherInstance, removeWatcherInstance, toggleWatcherInstance } from './watcher';
@@ -164,6 +164,18 @@ ipcMain.on('watcher:toggle', (event, instance: Watcher) => {
 });
 ipcMain.handle('watcher:getAll', () => {
   return getAllWatchersFromStore();
+});
+
+ipcMain.handle('electron:openFileDialog', async (event) => {
+  const window = BrowserWindow.fromWebContents(event.sender);
+  if (window) {
+    return await dialog.showOpenDialog(window, {
+      title: 'title',
+      defaultPath: app.getPath('home'),
+      properties: ['openDirectory', 'createDirectory', 'dontAddToRecent']
+    });
+  }
+  return undefined;
 });
 
 ipcMain.on('renderer-ready', () => {

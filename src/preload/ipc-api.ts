@@ -1,5 +1,5 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { ipcRenderer } from 'electron';
+import { ipcRenderer, OpenDialogReturnValue } from 'electron';
 import Watcher from '_main/watcher';
 
 /** Notify main the renderer is ready. */
@@ -38,5 +38,10 @@ async function getAllWatchers(): Promise<Watcher[]> {
 }
 
 
+async function openFileDialog(): Promise<OpenDialogReturnValue> {
+  return await ipcRenderer.invoke('electron:openFileDialog');
+}
 
-export default { rendererReady, storeGet, storeSet, addWatcherInstance, removeWatcherInstance, toggleWatcherInstance, getAllWatchers };
+
+
+export default { rendererReady, storeGet, storeSet, addWatcherInstance, removeWatcherInstance, toggleWatcherInstance, getAllWatchers, openFileDialog };

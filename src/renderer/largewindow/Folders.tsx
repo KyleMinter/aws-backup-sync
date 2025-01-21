@@ -1,10 +1,19 @@
 import React, { useState, useEffect } from 'react';
+import Modal from 'react-modal';
 import Watcher from '_main/watcher';
+import ipcApi from '_/preload/ipc-api';
 
 function Folders(): JSX.Element {
     const [watcherList, setWatcherList] = useState<Watcher[]>([]);
     const [selectedWatchers, setSelectedWatchers] = useState<Watcher[]>([]);
+    const [isPopupOpen, setPopupOpen] = useState(false);
 
+    const [newWatcherInstanceName, setWatcherInstanceName] = useState('');
+    const [newWatcherInstancePath, setWatcherInstancePath] = useState('');
+    const [newWatcherInstanceEnabled, setWatcherInstanceEnabled] = useState(true);
+    const [errorMessages, setErrorMessages] = useState<string[]>([]);
+
+    // Fetches the list of watchers.
     async function fetchWatcherList() {
         const watchers = await window.ipcAPI?.getAllWatchers();
         if (watchers !== undefined)
@@ -45,8 +54,52 @@ function Folders(): JSX.Element {
         }
     }
 
+    // Fetches the result of the watcher instance path via a open file dialog.
+    async function fetchWatcherInstancePath() {
+        const result = await window.ipcAPI?.openFileDialog();
+        if (result !== undefined && !result.canceled)
+        {
+            setWatcherInstancePath(result.filePaths[0]);
+        }
+    }
+
+    // Handles the adding of a watcher instance.
     function onWatcherAdd() {
+        let error: boolean = false;
+        const messages: string[] = [];
         
+        if (newWatcherInstanceName === '') {
+            error = true;
+            messages.push('Name must not be empty.');
+        }
+        
+        if (watcherList.some(e => e.name === newWatcherInstanceName)) {
+            error = true;
+            messages.push('Name must not be the same as a prexisting watched folder.');
+        }
+
+        if (newWatcherInstancePath === '') {
+            error = true;
+            messages.push('Folder path must not be empty.');
+        }
+
+        if (watcherList.some(e => e.filepath === newWatcherInstancePath)) {
+            error = true;
+            messages.push('Folder path must not be the same as a prexisting watched folder.');
+        }
+
+        if (error) {
+            setErrorMessages(messages);
+        }
+        else {
+            const watcher: Watcher = {name: newWatcherInstanceName, filepath: newWatcherInstancePath, enabled: newWatcherInstanceEnabled};
+            window.ipcAPI?.addWatcherInstance(watcher);
+            setWatcherInstanceName('');
+            setWatcherInstancePath('');
+            setWatcherInstanceEnabled(true);
+            setErrorMessages([]);
+            setPopupOpen(false);
+        }
     }
 
     fetchWatcherList();
@@ -59,8 +112,40 @@ function Folders(): JSX.Element {
                     <FolderWatcher watcher={watcherInstance} toggleHandler={handleWatcherToggle} selectionHandler={handleWatcherSelect} />
                 ))}
             </div>
-            <button type="button" onClick={onWatcherAdd}>Add</button>
+            <button type="button" onClick={() => setPopupOpen(true)}>Add</button>
             <button type="button" onClick={onWatcherDelete}>Delete</button>
+            <Modal
+                isOpen={isPopupOpen}
+                onRequestClose={() => setPopupOpen(false)}
+            >
+                <h1>Add New Folder</h1>
+                <p>wasd</p>
+                <form>
+                    <label>
+                        Name:
+                        <input type="text" value={newWatcherInstanceName} onChange={(e) => setWatcherInstanceName(e.target.value)} />
+                    </label>
+                    <br />
+                    <label>
+                        Folder Path:
+                        <input type="text" readOnly={true} value={newWatcherInstancePath} />
+                        <button type="button" onClick={() => fetchWatcherInstancePath()}>Search</button>
+                    </label>
+                    <br />
+                    <label>
+                        Enabled:
+                        <input type="checkbox" checked={newWatcherInstanceEnabled} onChange={(e) => setWatcherInstanceEnabled(e.target.checked)} />
+                    </label>
+                    <br />
+
+                    {errorMessages.length !== 0 && errorMessages.map(message => (
+                        <p>{message}<br /></p>
+                    ))}
+
+                    <button type="button" onClick={onWatcherAdd}>Confirm</button>
+                    <button type="button" onClick={() => {setErrorMessages([]); setPopupOpen(false);}}>Cancel</button>
+                </form>
+            </Modal>
         </div>
     );
 }
