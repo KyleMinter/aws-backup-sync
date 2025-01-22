@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Navbar from './Navbar';
+import About from './About';
 import Folders from './Folders';
 
 function LargeWindow(): JSX.Element {
@@ -12,7 +13,7 @@ function LargeWindow(): JSX.Element {
   let pageContent;
   switch (activePage) {
     case 'About':
-      pageContent = <h2>About</h2>
+      pageContent = <About />
       break;
     case 'General':
       pageContent = <h2>General</h2>
