@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Navbar from './Navbar';
 import About from './About';
+import Preferences from './Preferences';
 import Folders from './Folders';
 
 function LargeWindow(): JSX.Element {
@@ -8,15 +9,15 @@ function LargeWindow(): JSX.Element {
     window.ipcAPI?.rendererReady();
   }, []);
 
-  const [activePage, setActive] = useState('folders');
+  const [activePage, setActive] = useState('About');
 
   let pageContent;
   switch (activePage) {
     case 'About':
       pageContent = <About />
       break;
-    case 'General':
-      pageContent = <h2>General</h2>
+    case 'Preferences':
+      pageContent = <Preferences />
       break;
     case 'Folders':
       pageContent = <Folders />
@@ -25,7 +26,7 @@ function LargeWindow(): JSX.Element {
       pageContent = <h2>Transfers</h2>
       break;
     default:
-      pageContent = <h2>About</h2>
+      pageContent = <About />
   }
 
   return (
