@@ -7,8 +7,7 @@ import Watcher, { addWatcherInstance, removeWatcherInstance, toggleWatcherInstan
 
 let singleInstanceLock: boolean;
 let tray: Electron.Tray | undefined;
-let dockedWindow: Electron.BrowserWindow | undefined;
-let largeWindow: Electron.BrowserWindow | undefined;
+let window: Electron.BrowserWindow | undefined;
 
 /**
  * Creates the tray icon for the application.
@@ -25,24 +24,24 @@ const createTray = () => {
   ])
   tray.setContextMenu(contextMenu)
 
-  // Toggle the docked window when the tray icon is clicked.
-  tray.on('click', toggleDockedWindow);
+  // Toggle the window when the tray icon is clicked.
+  tray.on('click', toggleWindow);
 }
 
-function createLargeWindow() {
+function createWindow() {
   // Get the size of the display so we can size the window accordingly.
   const display = screen.getPrimaryDisplay();
   const displayWidth = display.bounds.width;
   const displayHeight = display.bounds.height;
 
-  // The desired size of the large window in relation to the screen size.
+  // The desired size of the window in relation to the screen size.
   const windowWidth = .60;
   const windowHeight = .75;
   
-  largeWindow = new BrowserWindow({
+  window = new BrowserWindow({
     width: displayWidth * windowWidth,
     height: displayHeight * windowHeight,
-    show: true,
+    show: false,
     frame: true,
     fullscreenable: false,
     resizable: false,
@@ -57,65 +56,28 @@ function createLargeWindow() {
   });
 
   // and load the index.html of the app.
-  largeWindow.loadFile('largewindow.html');
-}
-
-/**
- * Creates the docked window for the application. This is the window that is shown when the tray icon is clicked.
- */
-function createDockedWindow() {
-  // Get the size of the display so we can position the window in the bottom right corner of the screen.
-  const display = screen.getPrimaryDisplay();
-  const displayWidth = display.bounds.width;
-  const displayHeight = display.bounds.height;
-
-  // The desired size of the docked window.
-  const windowWidth = 800;
-  const windowHeight = 600;
-  
-  dockedWindow = new BrowserWindow({
-    width: windowWidth,
-    height: windowHeight,
-    // Position the window in the bottom right corner.
-    x: displayWidth - windowWidth,
-    y: displayHeight - windowHeight,
-    show: false,
-    frame: false,
-    fullscreenable: false,
-    resizable: false,
-    movable: false,
-    transparent: false,
-    skipTaskbar: true,
-    webPreferences: {
-      devTools: nodeEnv.dev,
-      preload: path.join(__dirname, './preload.bundle.js'),
-      webSecurity: nodeEnv.prod,
-    },
-  });
-
-  // and load the index.html of the app.
-  dockedWindow.loadFile('dockedwindow.html');
+  window.loadFile('index.html');
 
   // Hide the window when it loses focus.
-  dockedWindow.on('blur', () => {
-    dockedWindow!.hide();
+  window.on('blur', () => {
+    window!.hide();
   });
 }
 
 /**
-* Toggles the visibility of the docked window for the application.
+* Toggles the visibility of the window.
 */
-function toggleDockedWindow() {
+function toggleWindow() {
   // If the window is undefined for some reason, we will create it and show it. (this shouldn't happen)
-  if (!dockedWindow) {
-    createDockedWindow();
-    dockedWindow!.show();
+  if (!window) {
+    createWindow();
+    window!.show();
   }
   else {
-    if (dockedWindow.isVisible())
-      dockedWindow.hide();
+    if (window.isVisible())
+      window.hide();
     else
-        dockedWindow.show();
+        window.show();
   }
 }
 
@@ -123,25 +85,24 @@ function toggleDockedWindow() {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
-  //if (nodeEnv.dev || nodeEnv.prod) createDockedWindow();
+  //if (nodeEnv.dev || nodeEnv.prod) createWindow();
 
   // Get the single instance lock. If this is the second instance we will force it to quit.
   singleInstanceLock = app.requestSingleInstanceLock();
   if (!singleInstanceLock)
       handleQuit();
 
-  // Create the tray and docked window.
-  createDockedWindow();
-  createLargeWindow();
+  // Create the tray and window.
+  createWindow();
   createTray();
 });
 
 app.on('second-instance', () => {
-  if (dockedWindow) {
-    if (dockedWindow.isMinimized()) {
-        dockedWindow.restore()
+  if (window) {
+    if (window.isMinimized()) {
+        window.restore()
     }
-    dockedWindow.focus();
+    window.focus();
   }
 })
 
@@ -187,4 +148,4 @@ ipcMain.on('renderer-ready', () => {
 // code. You can also put them in separate files and require them here.
 
 // eslint-disable-next-line import/prefer-default-export
-export const exportedForTests = nodeEnv.test ? { createDockedWindow } : undefined;
+export const exportedForTests = nodeEnv.test ? { createWindow } : undefined;

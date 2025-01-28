@@ -4,7 +4,7 @@ import About from './About';
 import Preferences from './Preferences';
 import Folders from './Folders';
 
-function LargeWindow(): JSX.Element {
+function Window(): JSX.Element {
   useEffect(() => {
     window.ipcAPI?.rendererReady();
   }, []);
@@ -31,11 +31,11 @@ function LargeWindow(): JSX.Element {
 
   return (
     <div className="app">
-      <h2>large window</h2>
+      <h2>window</h2>
       <Navbar active={activePage} handler={setActive} />
       {pageContent}
     </div>
   );
 }
 
-export default LargeWindow;
+export default Window;
