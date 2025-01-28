@@ -9,8 +9,11 @@ type StoreSchema = {
         s3_ObjectKey: string;
         s3_awsRegion: string;
     },
+    preferences: {
+        openOnStartup: boolean;
+        transferDelay: number;
+    }
     watchers: Watcher[];
-    watch_path: string;
 }
 
 // JSON schema used by the store object.
@@ -33,6 +36,19 @@ const schema = {
         },
         default: {}
     },
+    preferences: {
+        type: 'object',
+        properties: {
+            openOnStartup: {
+                type: 'boolean',
+                default: 'true'
+            },
+            transferDelay: {
+                type: 'integer',
+                default: 0
+            }
+        }
+    },
     watchers: {
         type: 'array',
         items: {
@@ -53,10 +69,6 @@ const schema = {
             }
         },
         default: [{name: '', filepath: ''}]
-    },
-    watch_path: {
-        type: 'string',
-        default: ''
     }
 } as const;
 

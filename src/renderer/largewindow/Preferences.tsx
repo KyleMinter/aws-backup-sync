@@ -6,6 +6,9 @@ function Preferences(): JSX.Element {
   const [s3_ObjectKey, setS3ObjectKey] = useState('');
   const [s3_awsRegion, setS3AWSRegion] = useState('');
 
+  const [openOnStartup, setOpenOnStartup] = useState(true);
+  const [transferDelay, setTransferDelay] = useState(0);
+
   const [preferencesChanged, setPreferencesChanged] = useState(false);
   const [errorMessages, setErrorMessages] = useState<string[]>([]);
 
@@ -15,10 +18,13 @@ function Preferences(): JSX.Element {
   
   async function fetchPreferences() {
     const awsCredentials = await window.ipcAPI?.storeGet('awsCredentials');
-
     setS3BucketName(awsCredentials.s3_BucketName);
     setS3ObjectKey(awsCredentials.s3_ObjectKey);
     setS3AWSRegion(awsCredentials.s3_awsRegion);
+
+    const preferences = await window.ipcAPI?.storeGet('preferences');
+    setOpenOnStartup(preferences.openOnStartup);
+    setTransferDelay(preferences.transferDelay);
   }
 
   async function savePreferencesToStore() {
@@ -27,8 +33,13 @@ function Preferences(): JSX.Element {
       s3_ObjectKey: s3_ObjectKey,
       s3_awsRegion: s3_awsRegion
     };
-
     await window.ipcAPI?.storeSet('awsCredentials', awsCredentials);
+
+    const preferences = {
+      openOnStartup: openOnStartup,
+      transferDelay: transferDelay
+    }
+    await window.ipcAPI?.storeSet('preferences', preferences);
   }
 
   async function onSaveChanges() {
@@ -82,6 +93,19 @@ function Preferences(): JSX.Element {
           <label>
             AWS Region:
             <input type="text" value={s3_awsRegion} onChange={(e) => {setPreferencesChanged(true); setS3AWSRegion(e.target.value);}} />
+          </label>
+        </form>
+        
+        <h2>General Preferences</h2>
+        <form>
+          <label>
+            Open on Startup:
+            <input type="checkbox" checked={openOnStartup} onChange={() => {setPreferencesChanged(true); setOpenOnStartup(!openOnStartup)}} />
+          </label>
+          <br />
+          <label>
+            Transfer Delay (mins):
+            <input type="number" value={transferDelay} onChange={(e) => {setPreferencesChanged(true); setTransferDelay(e.target.valueAsNumber)}} />
           </label>
         </form>
       </div>
