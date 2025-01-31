@@ -4,6 +4,7 @@ import { BrowserWindow, Tray, Menu, nativeImage, screen, app, ipcMain, dialog } 
 import * as nodeEnv from '_utils/node-env';
 import { getStore, setStore, getAllWatchersFromStore } from './store';
 import Watcher, { addWatcherInstance, removeWatcherInstance, toggleWatcherInstance } from './watcher';
+import Transfer, { getTransferList } from './transfers';
 
 let singleInstanceLock: boolean;
 let tray: Electron.Tray | undefined;
@@ -28,7 +29,7 @@ const createTray = () => {
   tray.on('click', toggleWindow);
 }
 
-function createWindow() {
+async function createWindow() {
   // Get the size of the display so we can size the window accordingly.
   const display = screen.getPrimaryDisplay();
   const displayWidth = display.bounds.width;
@@ -56,7 +57,7 @@ function createWindow() {
   });
 
   // and load the index.html of the app.
-  window.loadFile('index.html');
+  await window.loadFile('index.html');
 
   // Hide the window when it loses focus.
   window.on('blur', () => {
@@ -84,7 +85,7 @@ function toggleWindow() {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   //if (nodeEnv.dev || nodeEnv.prod) createWindow();
 
   // Get the single instance lock. If this is the second instance we will force it to quit.
@@ -93,8 +94,10 @@ app.whenReady().then(() => {
       handleQuit();
 
   // Create the tray and window.
-  createWindow();
+  await createWindow();
   createTray();
+
+  Transfer.registerUpdateListener(invokeUpdateTransfersEvent);
 });
 
 app.on('second-instance', () => {
@@ -111,22 +114,36 @@ function handleQuit() {
 }
 
 // IPC handles for store related functions
-ipcMain.handle('store:get', getStore);
-ipcMain.on('store:set', setStore)
+ipcMain.handle('store:get', (_event, key: string) => {
+  return getStore(key);
+});
+ipcMain.on('store:set', (_event, key: string, value: string) => {
+  setStore(key, value);
+});
 
-ipcMain.on('watcher:add', (event, instance: Watcher) => {
+// IPC handles for watcher related functions
+ipcMain.on('watcher:add', (_event, instance: Watcher) => {
   addWatcherInstance(instance);
 });
-ipcMain.on('watcher:remove', (event, instance: Watcher) => {
+ipcMain.on('watcher:remove', (_event, instance: Watcher) => {
   removeWatcherInstance(instance);
 });
-ipcMain.on('watcher:toggle', (event, instance: Watcher) => {
+ipcMain.on('watcher:toggle', (_event, instance: Watcher) => {
   toggleWatcherInstance(instance);
 });
 ipcMain.handle('watcher:getAll', () => {
   return getAllWatchersFromStore();
 });
 
+//IPC handler for transfer log functions
+ipcMain.handle('transfers:getTransferList', (_event, filter: string) => {
+  return getTransferList(filter);
+});
+function invokeUpdateTransfersEvent(list: Transfer[]) {
+  //window?.webContents.send('transfers:update', list);
+}
+
+// IPC handle for open file dialog function
 ipcMain.handle('electron:openFileDialog', async (event) => {
   const window = BrowserWindow.fromWebContents(event.sender);
   if (window) {

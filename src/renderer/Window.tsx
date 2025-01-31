@@ -3,6 +3,7 @@ import Navbar from './Navbar';
 import About from './About';
 import Preferences from './Preferences';
 import Folders from './Folders';
+import Transfers from './Transfers';
 
 function Window(): JSX.Element {
   useEffect(() => {
@@ -23,7 +24,7 @@ function Window(): JSX.Element {
       pageContent = <Folders />
       break;
     case 'Transfers':
-      pageContent = <h2>Transfers</h2>
+      pageContent = <Transfers />
       break;
     default:
       pageContent = <About />

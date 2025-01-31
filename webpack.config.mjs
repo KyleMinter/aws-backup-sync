@@ -52,6 +52,9 @@ const commonConfig = {
       },
     ],
   },
+  externals: {
+    fsevents: 'fsevents',
+  }
 };
 
 const mainConfig = merge(commonConfig, {

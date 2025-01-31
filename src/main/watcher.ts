@@ -1,5 +1,6 @@
 import chokidar from 'chokidar';
 import { addWatcherToStore, removeWatcherFromStore, updateWatcherInStore, getAllWatchersFromStore } from "./store";
+import { queueFileForUpload } from './transfers';
 
 export default class Watcher {
     name: string;
@@ -25,10 +26,11 @@ const watcherOptions = {
 
 
 const watcher = chokidar.watch(getAllWatchersFromStore().map((watcher: Watcher) => watcher.filepath), watcherOptions);
-watcher.on('all', (path) => {
-    console.log(path);
+watcher.on('all', (event, path) => {
+    queueFileForUpload(path);
 });
 
+watcher.on
 export function addWatcherInstance(instance: Watcher): void {
     addWatcherToStore(instance);
     if (instance.enabled)

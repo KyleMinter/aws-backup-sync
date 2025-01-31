@@ -1,6 +1,7 @@
 import { IpcMainInvokeEvent } from 'electron';
 import Store from 'electron-store';
 import Watcher from './watcher'
+import { updateTransferDelay } from './transfers';
 
 // Type definitions for the schema.
 type StoreSchema = {
@@ -74,6 +75,7 @@ const schema = {
 
 // Store instance which allows us to inerface with the file system.
 const store = new Store<StoreSchema>({ schema });
+updateTransferDelay(store.get('preferences').transferDelay);
 
 
 /**
@@ -81,7 +83,7 @@ const store = new Store<StoreSchema>({ schema });
  * @param key the key to get the value of
  * @returns the value of the key
  */
-export function getStore(event: IpcMainInvokeEvent, key: string): any {
+export function getStore(key: string): any {
     return store.get(key);
 }
 
@@ -90,8 +92,11 @@ export function getStore(event: IpcMainInvokeEvent, key: string): any {
  * @param key the key associated with the stored value
  * @param value the value to store
  */
-export function setStore(event: IpcMainInvokeEvent, key: string, value: any): void {
+export function setStore(key: string, value: any): void {
     store.set(key, value);
+
+    if (key === 'preferences')
+        updateTransferDelay(value.transferDelay as number);
 }
 
 export function addWatcherToStore(watcher: Watcher) {
