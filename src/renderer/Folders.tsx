@@ -13,6 +13,10 @@ function Folders(): JSX.Element {
     const [newWatcherInstanceEnabled, setWatcherInstanceEnabled] = useState(true);
     const [errorMessages, setErrorMessages] = useState<string[]>([]);
 
+    useEffect(() => {
+        fetchWatcherList();
+    }, []);
+
     // Fetches the list of watchers.
     async function fetchWatcherList() {
         const watchers = await window.ipcAPI?.getAllWatchers();
@@ -31,8 +35,8 @@ function Folders(): JSX.Element {
     // Handle selection of a watcher instance.
     function handleWatcherSelect(watcher: Watcher) {
         // Check if the specified watcher instance is already selected. If it is, it will be removed from the list. Otherwise it will be added to the list.
-        if (selectedWatchers.some(selectedWatcher => selectedWatcher.filepath === watcher.filepath)) {
-            setSelectedWatchers(selectedWatchers.filter((selectedWatcher) => selectedWatcher.filepath !== watcher.filepath))
+        if (selectedWatchers.some(selectedWatcher => selectedWatcher.dirpath === watcher.dirpath)) {
+            setSelectedWatchers(selectedWatchers.filter((selectedWatcher) => selectedWatcher.dirpath !== watcher.dirpath))
         }
         else {
             setSelectedWatchers([...selectedWatchers, watcher]);
@@ -83,7 +87,7 @@ function Folders(): JSX.Element {
             messages.push('Folder path must not be empty.');
         }
 
-        if (watcherList.some(e => e.filepath === newWatcherInstancePath)) {
+        if (watcherList.some(e => e.dirpath === newWatcherInstancePath)) {
             error = true;
             messages.push('Folder path must not be the same as a prexisting watched folder.');
         }
@@ -92,7 +96,7 @@ function Folders(): JSX.Element {
             setErrorMessages(messages);
         }
         else {
-            const watcher: Watcher = {name: newWatcherInstanceName, filepath: newWatcherInstancePath, enabled: newWatcherInstanceEnabled};
+            const watcher: Watcher = {name: newWatcherInstanceName, dirpath: newWatcherInstancePath, enabled: newWatcherInstanceEnabled};
             window.ipcAPI?.addWatcherInstance(watcher);
             setWatcherInstanceName('');
             setWatcherInstancePath('');
@@ -101,8 +105,6 @@ function Folders(): JSX.Element {
             setPopupOpen(false);
         }
     }
-
-    fetchWatcherList();
 
     return (
         <div className="app">
@@ -169,7 +171,7 @@ function FolderWatcher(props: FolderWatcherProps): JSX.Element {
         <div className={"folder-watcher" + (selected ? "active" : "")} onClick={handleClick} style={{backgroundColor: selected ? 'lightblue' : 'white'}}>
             <input type="checkbox" checked={props.watcher.enabled} onChange={() => props.toggleHandler(props.watcher)} />
             <p>{props.watcher.name}</p>
-            <p>{props.watcher.filepath}</p>
+            <p>{props.watcher.dirpath}</p>
         </div>
     )
 }

@@ -2,9 +2,9 @@ import * as path from 'path';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { BrowserWindow, Tray, Menu, nativeImage, screen, app, ipcMain, dialog } from 'electron';
 import * as nodeEnv from '_utils/node-env';
-import { getStore, setStore, getAllWatchersFromStore } from './store';
-import Watcher, { addWatcherInstance, removeWatcherInstance, toggleWatcherInstance } from './watcher';
-import Transfer, { getTransferList } from './transfers';
+import * as store from './store';
+import Watcher from './watcher';
+import Transfer from './transfers';
 
 let singleInstanceLock: boolean;
 let tray: Electron.Tray | undefined;
@@ -61,7 +61,7 @@ async function createWindow() {
 
   // Hide the window when it loses focus.
   window.on('blur', () => {
-    window!.hide();
+    //window!.hide();
   });
 }
 
@@ -75,8 +75,9 @@ function toggleWindow() {
     window!.show();
   }
   else {
-    if (window.isVisible())
-      window.hide();
+    if (window.isVisible()) {
+      // window.hide();
+    }
     else
         window.show();
   }
@@ -97,7 +98,9 @@ app.whenReady().then(async () => {
   await createWindow();
   createTray();
 
+  // Register the update listener for the transfers and initialize the watchers.
   Transfer.registerUpdateListener(invokeUpdateTransfersEvent);
+  Watcher.initializeWatchers();
 });
 
 app.on('second-instance', () => {
@@ -115,32 +118,32 @@ function handleQuit() {
 
 // IPC handles for store related functions
 ipcMain.handle('store:get', (_event, key: string) => {
-  return getStore(key);
+  return store.getStore(key);
 });
 ipcMain.on('store:set', (_event, key: string, value: string) => {
-  setStore(key, value);
+  store.setStore(key, value);
 });
 
 // IPC handles for watcher related functions
 ipcMain.on('watcher:add', (_event, instance: Watcher) => {
-  addWatcherInstance(instance);
+  Watcher.addWatcherInstance(instance);
 });
 ipcMain.on('watcher:remove', (_event, instance: Watcher) => {
-  removeWatcherInstance(instance);
+  Watcher.removeWatcherInstance(instance);
 });
 ipcMain.on('watcher:toggle', (_event, instance: Watcher) => {
-  toggleWatcherInstance(instance);
+  Watcher.toggleWatcherInstance(instance);
 });
 ipcMain.handle('watcher:getAll', () => {
-  return getAllWatchersFromStore();
+  return store.getAllWatchersFromStore();
 });
 
 //IPC handler for transfer log functions
 ipcMain.handle('transfers:getTransferList', (_event, filter: string) => {
-  return getTransferList(filter);
+  return Transfer.getTransferList(filter);
 });
 function invokeUpdateTransfersEvent(list: Transfer[]) {
-  //window?.webContents.send('transfers:update', list);
+  window?.webContents.send('transfers:update', list);
 }
 
 // IPC handle for open file dialog function

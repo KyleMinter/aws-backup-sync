@@ -6,6 +6,11 @@ function Transfers(): JSX.Element {
     const [transferList, setTransferList] = useState<Transfer[]>([]);
     const [selectedFilter, setSelectedFilter] = useState('All');
 
+    useEffect(() => {
+        window.ipcAPI?.onUpdateTransferList(handleReply);
+        fetchTransferList();
+    }, []);
+
     // Fetches the list of transfers.
     async function fetchTransferList() {
         const transfers = await window.ipcAPI?.getTransferList(selectedFilter);
@@ -19,10 +24,6 @@ function Transfers(): JSX.Element {
         setTransferList(list);
     }
 
-    window.ipcAPI?.onUpdateTransferList(handleReply);
-
-    fetchTransferList();
-
     return (
         <div className="app">
             <h4>Transfers</h4>
@@ -35,19 +36,19 @@ function Transfers(): JSX.Element {
                 <h4>Filter:</h4>
                 <label>
                     All
-                    <input type="radio" checked={selectedFilter === "All"} onChange={() => {setSelectedFilter("All"); fetchTransferList()}} />
+                    <input type="radio" checked={selectedFilter === "All"} onChange={() => {setSelectedFilter("All"); /*fetchTransferList()*/}} />
                 </label>
                 <label>
                     In Queue
-                    <input type="radio" checked={selectedFilter === "InQueue"} onChange={() => {setSelectedFilter("InQueue"); fetchTransferList()}} />
+                    <input type="radio" checked={selectedFilter === "InQueue"} onChange={() => {setSelectedFilter("InQueue"); /*fetchTransferList()*/}} />
                 </label>
                 <label>
                     Uploading
-                    <input type="radio" checked={selectedFilter === "Uploading"} onChange={() => {setSelectedFilter("Uploading"); fetchTransferList()}} />
+                    <input type="radio" checked={selectedFilter === "Uploading"} onChange={() => {setSelectedFilter("Uploading"); /*fetchTransferList()*/}} />
                 </label>
                 <label>
                     Completed
-                    <input type="radio" checked={selectedFilter === "Completed"} onChange={() => {setSelectedFilter("Completed"); fetchTransferList()}} />
+                    <input type="radio" checked={selectedFilter === "Completed"} onChange={() => {setSelectedFilter("Completed"); /*fetchTransferList()*/}} />
                 </label>
             </form>
         </div>

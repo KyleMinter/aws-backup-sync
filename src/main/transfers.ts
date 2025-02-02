@@ -1,13 +1,38 @@
-const MILLISECONDS_PER_MINUTE = 60000;
-const MILLISECONDS_PER_SECOND = 1000;
+/**
+ * A Enum representing the status of a Transfer.
+ * A transfer can be InQueue, Uploading, or Complete.
+ */
+export enum TransferStatus {
+    InQueue,
+    Uploading,
+    Complete
+}
 
+/**
+ * A class representing a file transfer to AWS S3.
+ * It contains the filepath of the file being uploaded, the transfer's status, when the transfer was complete (if applicable), and a timeout used for delaying the transfer.
+ * This class also has a static member used as a callback listner for invoking UI updates of the transfer list whenever an individual transfer is completed/updated/changed.
+ */
 export default class Transfer {
+    // Static constants.
+    private static readonly MILLISECONDS_PER_MINUTE = 60000;
+    private static readonly MILLISECONDS_PER_SECOND = 1000;
+
+    // Static class members.
+    private static transferList: Transfer[] = [];
+    private static transferDelay: number;
+    private static updateListener: ((list: Transfer[]) => void) | undefined = undefined;
+    
+    // Class members.
     filepath: string;
     status: TransferStatus;
     dateCompleted: Date | undefined;
     timeout: NodeJS.Timeout | undefined;
-    static updateListener: ((list: Transfer[]) => void) | undefined = undefined;
 
+    /**
+     * Constructs a Transfer object with a given filepath. This new Transfer's status = InQueue, dateCompleted = undefined, and timeout = undefined.
+     * @param filepath the filepath of the file to be uploaded to AWS S3.
+     */
     constructor(filepath: string) {
         this.filepath = filepath;
         this.status = TransferStatus.InQueue;
@@ -15,113 +40,145 @@ export default class Transfer {
         this.timeout = undefined;
     }
 
+    /**
+     * Compeltes the transfer by uploading the file to AWS S3.
+     * The status of the transfer is updated while completing the transfer process and the date/time it was completed is update upon it finishing.
+     */
     public async completeTransfer() {
         this.status = TransferStatus.Uploading;
+        Transfer.invokeTransferListUpdate();
+        
         // do aws transfer stuff
         console.log(`uploading ${this.filepath} to AWS`);
+
         this.status = TransferStatus.Complete;
         this.dateCompleted = new Date();
+        Transfer.invokeTransferListUpdate();
     }
 
+    /**
+     * Cancels the delay timer on the current Transfer. If this Transfer doesn't have a delay timer, this method will do nothing.
+     * Once the delay timer is canceled, the Transfer will no longer automatically complete itself.
+     */
     public cancelDelayTimer() {
         if (this.timeout)
             clearTimeout(this.timeout);
     }
 
+    /**
+     * Registers the update listener callback function that is called whenever a UI update of the transfer list is invoked.
+     * @param callback the callback function that will be called whenever a UI update is invoked.
+     */
     public static registerUpdateListener(callback: (list: Transfer[]) => void) {
         Transfer.updateListener = callback;
     }
 
+    /**
+     * Invokes a UI transfer list update by calling Transfer.updateListner.
+     */
     public static invokeTransferListUpdate() {
         if (Transfer.updateListener) {
-            Transfer.updateListener(
-                transferList.map((transfer) => {
-                    transfer.timeout = undefined;
-                    return transfer;
-                })
-            );
+            Transfer.updateListener(Transfer.stripTimersFromTransferList(Transfer.transferList));
         }
     }
-}
 
-export enum TransferStatus {
-    InQueue,
-    Uploading,
-    Complete
-}
+    /**
+     * Updates the transfer delay for all future transfers.
+     * @param delay the new tranfer delay (mins)
+     */
+    static updateTransferDelay(delay: number) {
+        Transfer.transferDelay = delay;
+    }
 
-const transferList: Transfer[] = [];
-let transferDelay: number;
+    /**
+     * Queues a file for upload to AWS D3 and creates a new Transfer object for it.
+     * @param filepath the filepath of the file to be uploaded to AWS S3.
+     */
+    static async queueFileForUpload(filepath: string) {
+        // Check for an already existing transfer for this file.
+        let fileTransfer = Transfer.findAndRemoveExistingTransfer(filepath);
 
-export function updateTransferDelay(delay: number) {
-    transferDelay = delay;
-}
+        // If there wasn't an prexisting tranfers we will create a new one.
+        if (!fileTransfer)
+            fileTransfer = new Transfer(filepath);
+        
+        // Push this transfer onto the transfer list.
+        Transfer.transferList.push(fileTransfer);
 
-export async function queueFileForUpload(filepath: string) {
-    // Check for an already existing transfer for this file.
-    let fileTranfer = findAndRemoveExistingTransfer(filepath);
+        // Clear the delay and date for this transfer.
+        fileTransfer.cancelDelayTimer();
+        fileTransfer.dateCompleted = undefined;
 
-    // If there wasn't an prexisting tranfers we will create a new one.
-    if (!fileTranfer)
-        fileTranfer = new Transfer(filepath);
-    
-    // Push this transfer onto the transfer list.
-    transferList.push(fileTranfer);
-
-    // Clear the delay for this transfer.
-    fileTranfer.cancelDelayTimer();
-
-    // If there is a transfer delay set we will complete the transfer once the delay has been executed. If not we will complete the transfer immediately.
-    if (transferDelay > 0)
-        fileTranfer.timeout = setTimeout(async () => {
-            await fileTranfer!.completeTransfer();
+        // If there is a transfer delay set we will complete the transfer once the delay has been executed. If not we will complete the transfer immediately.
+        if (Transfer.transferDelay > 0) {
             Transfer.invokeTransferListUpdate();
-        }, transferDelay * MILLISECONDS_PER_SECOND);
-    else {
-        await fileTranfer.completeTransfer();
-        Transfer.invokeTransferListUpdate();
-    }
-
-}
-
-function findAndRemoveExistingTransfer(filepath: string): Transfer | undefined {
-    // Find the index of a transfer with the same file path.
-    const index = transferList.findIndex((element) => element.filepath === filepath);
-
-    // If a transfer index was found we will remove that element from the transfer list and return it. If not we will return undefined.
-    if (index !== -1) {
-        const transfer = transferList[index];
-        transferList.splice(index, 1);
-        return transfer;
-    }
-    else {
-        return undefined;
-    }
-}
-
-export function getTransferList(filter: string): Transfer[] {
-    let returnTransferList = transferList;
-    switch (filter) {
-        case 'All':
-            break;
-        case 'InQueue': {
-            returnTransferList = transferList.filter((transfer) => transfer.status === TransferStatus.InQueue);
-            break;
+            fileTransfer.timeout = setTimeout(async () => {
+                await fileTransfer!.completeTransfer();
+            }, Transfer.transferDelay * Transfer.MILLISECONDS_PER_MINUTE);
         }
-        case 'Uploading': {
-            returnTransferList = transferList.filter((transfer) => transfer.status === TransferStatus.Uploading);
-            break;
+        else {
+            await fileTransfer.completeTransfer();
         }
-        case 'Completed': {
-            returnTransferList = transferList.filter((transfer) => transfer.status === TransferStatus.Complete);
-            break;
-        }
-        default:
-            break;
     }
 
-    return returnTransferList.map((transfer) => {
-        transfer.timeout = undefined;
-        return transfer;
-    });
+    /**
+     * Removes an existing transfer with a given filepath from the transfer list and returns it. If no transfer was found in the list, undefined is returned.
+     * @param filepath the filepath of the transfer to be removed from the list
+     * @returns the transfer that was removed from the list, undefined if no transfer with the given filepath was found
+     */
+    private static findAndRemoveExistingTransfer(filepath: string): Transfer | undefined {
+        // Find the index of a transfer with the same file path.
+        const index = Transfer.transferList.findIndex((element) => element.filepath === filepath);
+    
+        // If a transfer index was found we will remove that element from the transfer list and return it. If not we will return undefined.
+        if (index !== -1) {
+            const transfer = Transfer.transferList[index];
+            Transfer.transferList.splice(index, 1);
+            return transfer;
+        }
+        else {
+            return undefined;
+        }
+    }
+
+    /**
+     * Returns the transfer list with a specified filter for the transfer status applied.
+     * @param filter the filter to apply to the transfer list. Options include [All, InQueue, Uploading, Complete]
+     * @returns the transfer list with the filter applied
+     */
+    static getTransferList(filter: string): Transfer[] {
+        let returnTransferList = Transfer.transferList;
+        
+        // Applies the given filter to the transfer list.
+        switch (filter) {
+            case 'InQueue': {
+                returnTransferList = returnTransferList.filter((transfer) => transfer.status === TransferStatus.InQueue);
+                break;
+            }
+            case 'Uploading': {
+                returnTransferList = returnTransferList.filter((transfer) => transfer.status === TransferStatus.Uploading);
+                break;
+            }
+            case 'Completed': {
+                returnTransferList = returnTransferList.filter((transfer) => transfer.status === TransferStatus.Complete);
+                break;
+            }
+            default:
+                break;
+        }
+    
+        return Transfer.stripTimersFromTransferList(returnTransferList);
+    }
+
+    /**
+     * Strips the a given transfer list of any timer infromation as Electron will throw an exception if we try to send it over the IPC channels.
+     * @param list the transfer list to strip timer delay from
+     * @returns the given transfer list without delay timers
+     */
+    private static stripTimersFromTransferList(list: Transfer[]) {
+        return list.map((transfer) => {
+            transfer.timeout = undefined;
+            return transfer;
+        });
+    }
 }

@@ -1,7 +1,6 @@
-import { IpcMainInvokeEvent } from 'electron';
 import Store from 'electron-store';
 import Watcher from './watcher'
-import { updateTransferDelay } from './transfers';
+import Transfer from './transfers';
 
 // Type definitions for the schema.
 type StoreSchema = {
@@ -59,7 +58,7 @@ const schema = {
                     type: 'string',
                     default: ''
                 },
-                filepath: {
+                dirpath: {
                     type: 'string',
                     default: ''
                 },
@@ -69,13 +68,15 @@ const schema = {
                 }
             }
         },
-        default: [{name: '', filepath: ''}]
+        default: [{name: '', dirpath: ''}]
     }
 } as const;
 
 // Store instance which allows us to inerface with the file system.
 const store = new Store<StoreSchema>({ schema });
-updateTransferDelay(store.get('preferences').transferDelay);
+
+// Set the initial transfer delay from the store.
+Transfer.updateTransferDelay(store.get('preferences').transferDelay);
 
 
 /**
@@ -96,28 +97,40 @@ export function setStore(key: string, value: any): void {
     store.set(key, value);
 
     if (key === 'preferences')
-        updateTransferDelay(value.transferDelay as number);
+        Transfer.updateTransferDelay(value.transferDelay as number);
 }
 
+/**
+ * Stores a given watcher instance into storage.
+ * @param watcher the watcher instance to store
+ */
 export function addWatcherToStore(watcher: Watcher) {
     const watchersList = store.get('watchers') as Watcher[];
     watchersList.push(watcher);
     store.set('watchers', watchersList);
 }
 
+/**
+ * Removes a given watcher instance from storage.
+ * @param watcher the watcher instance to remove
+ */
 export function removeWatcherFromStore(watcher: Watcher) {
     const watchersList = store.get('watchers') as Watcher[];
-    const index = watchersList.findIndex((element) => element.filepath === watcher.filepath);
+    const index = watchersList.findIndex((element) => element.dirpath === watcher.dirpath);
     if (index > -1) {
         watchersList.splice(index, 1);
     }
     store.set('watchers', watchersList);
 }
 
+/**
+ * Updates a given watcher instance in storage.
+ * @param watcher the watcher instance to update
+ */
 export function updateWatcherInStore(watcher: Watcher) {
     const watchersList = store.get('watchers') as Watcher[];
     watchersList.map((element) => {
-        if (element.filepath === watcher.filepath) {
+        if (element.dirpath === watcher.dirpath) {
             element.name = watcher.name;
             element.enabled = watcher.enabled;
         }
@@ -125,6 +138,12 @@ export function updateWatcherInStore(watcher: Watcher) {
     store.set('watchers', watchersList);
 }
 
+/**
+ * Returns a list of all the watchers that are stored.
+ * @returns the list of all stored watcher instances
+ */
 export function getAllWatchersFromStore(): Watcher[] {
     return store.get('watchers') as Watcher[];
 }
+
+export default { getStore, setStore, addWatcherToStore, removeWatcherFromStore, updateWatcherInStore, getAllWatchersFromStore };
