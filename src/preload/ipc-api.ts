@@ -1,7 +1,7 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { ipcRenderer, OpenDialogReturnValue } from 'electron';
 import Watcher from '_main/watcher';
-import Transfer from '_main/transfers';
+import Transfer, { TransferStatus } from '_main/transfers';
 
 /** Notify main the renderer is ready. */
 function rendererReady() {
@@ -40,16 +40,16 @@ async function getAllWatchers(): Promise<Watcher[]> {
 
 
 // Transfer API
-async function getTransferList(filter: string): Promise<Transfer[]> {
-  return await ipcRenderer.invoke('transfers:getTransferList', filter);
+async function getTransferList(filter: TransferStatus | undefined): Promise<Transfer[]> {
+  return await ipcRenderer.invoke('transfers:getTransfers', filter);
 }
 
-async function onUpdateTransferList(callback: (list: Transfer[]) => void) {
-  ipcRenderer.on('transfers:update', (_event, list) => callback(list));
+async function onUpdateTransfer(callback: (transfer: Transfer) => void) {
+  ipcRenderer.on('transfers:update', (_event, transfer) => callback(transfer));
 }
 
 async function openFileDialog(): Promise<OpenDialogReturnValue> {
   return await ipcRenderer.invoke('electron:openFileDialog');
 }
 
-export default { rendererReady, storeGet, storeSet, addWatcherInstance, removeWatcherInstance, toggleWatcherInstance, getAllWatchers, getTransferList, onUpdateTransferList, openFileDialog };
+export default { rendererReady, storeGet, storeSet, addWatcherInstance, removeWatcherInstance, toggleWatcherInstance, getAllWatchers, getTransferList, onUpdateTransfer, openFileDialog };

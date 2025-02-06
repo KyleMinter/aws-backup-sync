@@ -1,28 +1,48 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Transfer, { TransferStatus } from '_/main/transfers';
-//import ipcApi from '_/preload/ipc-api';
 
 function Transfers(): JSX.Element {
     const [transferList, setTransferList] = useState<Transfer[]>([]);
-    const [selectedFilter, setSelectedFilter] = useState('All');
+    const [selectedFilter, setSelectedFilter] = useState<TransferStatus | undefined>(undefined);
+
+    /**
+     * Callback function that is invoked whenever a Transfer has been updated.
+     * @param transfer the updated transfer
+     */
+    const handleTransferUpdate = useCallback((transfer: Transfer) => {
+        if (selectedFilter === undefined) {
+            // If a there is no filter applied and the transfer is already in the list, we will update the Transfer element.
+            if (transferList.some(e => e.filepath === transfer.filepath))
+                setTransferList(transferList.map((element) => element.filepath === transfer.filepath ? transfer : element));
+            // If a there is no filter applied and the transfer is already in the list, we will add the Transfer to the list.
+            else
+                setTransferList([...transferList, transfer]);
+        }
+        else {
+            // If the updated transfer does match the current filter, we will remove it from the list.
+            if (selectedFilter as TransferStatus !== transfer.status)
+                setTransferList(transferList.filter((element) => element.filepath === transfer.filepath));
+            // If the update transfer does match the current filter, we will add it to the list.
+            else if (selectedFilter as TransferStatus === transfer.status)
+                setTransferList([...transferList, transfer]);
+        }
+    }, [selectedFilter, transferList]);
 
     useEffect(() => {
-        window.ipcAPI?.onUpdateTransferList(handleReply);
-        fetchTransferList();
-    }, []);
-
-    // Fetches the list of transfers.
-    async function fetchTransferList() {
-        const transfers = await window.ipcAPI?.getTransferList(selectedFilter);
-        if (transfers !== undefined)
-        {
-            setTransferList(transfers);
+        // Async functions for setting the update callback & fetching the transfer list.
+        async function setUpdateCallback() {
+            await window.ipcAPI?.onUpdateTransfer(handleTransferUpdate);
         }
-    }
+        
+        async function fetchTransferList() {
+            const transfers = await window.ipcAPI?.getTransferList(selectedFilter);
+            if (transfers !== undefined)
+                setTransferList(transfers);
+        }
 
-    const handleReply = (list: Transfer[]) => {
-        setTransferList(list);
-    }
+        setUpdateCallback();
+        fetchTransferList();
+    }, [transferList, selectedFilter, handleTransferUpdate]);
 
     return (
         <div className="app">
@@ -36,19 +56,19 @@ function Transfers(): JSX.Element {
                 <h4>Filter:</h4>
                 <label>
                     All
-                    <input type="radio" checked={selectedFilter === "All"} onChange={() => {setSelectedFilter("All"); /*fetchTransferList()*/}} />
+                    <input type="radio" checked={selectedFilter === undefined} onChange={() => setSelectedFilter(undefined)} />
                 </label>
                 <label>
                     In Queue
-                    <input type="radio" checked={selectedFilter === "InQueue"} onChange={() => {setSelectedFilter("InQueue"); /*fetchTransferList()*/}} />
+                    <input type="radio" checked={selectedFilter === TransferStatus.InQueue} onChange={() => setSelectedFilter(TransferStatus.InQueue)} />
                 </label>
                 <label>
                     Uploading
-                    <input type="radio" checked={selectedFilter === "Uploading"} onChange={() => {setSelectedFilter("Uploading"); /*fetchTransferList()*/}} />
+                    <input type="radio" checked={selectedFilter === TransferStatus.Uploading} onChange={() => setSelectedFilter(TransferStatus.Uploading)} />
                 </label>
                 <label>
                     Completed
-                    <input type="radio" checked={selectedFilter === "Completed"} onChange={() => {setSelectedFilter("Completed"); /*fetchTransferList()*/}} />
+                    <input type="radio" checked={selectedFilter === TransferStatus.Complete} onChange={() => setSelectedFilter(TransferStatus.Complete)} />
                 </label>
             </form>
         </div>

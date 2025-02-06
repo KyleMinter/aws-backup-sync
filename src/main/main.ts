@@ -4,7 +4,7 @@ import { BrowserWindow, Tray, Menu, nativeImage, screen, app, ipcMain, dialog } 
 import * as nodeEnv from '_utils/node-env';
 import * as store from './store';
 import Watcher from './watcher';
-import Transfer from './transfers';
+import Transfer, { TransferStatus } from './transfers';
 
 let singleInstanceLock: boolean;
 let tray: Electron.Tray | undefined;
@@ -139,11 +139,11 @@ ipcMain.handle('watcher:getAll', () => {
 });
 
 //IPC handler for transfer log functions
-ipcMain.handle('transfers:getTransferList', (_event, filter: string) => {
+ipcMain.handle('transfers:getTransfers', (_event, filter: TransferStatus | undefined) => {
   return Transfer.getTransferList(filter);
 });
-function invokeUpdateTransfersEvent(list: Transfer[]) {
-  window?.webContents.send('transfers:update', list);
+function invokeUpdateTransfersEvent(transfer: Transfer) {
+  window?.webContents.send('transfers:update', transfer);
 }
 
 // IPC handle for open file dialog function

@@ -21,7 +21,7 @@ export default class Transfer {
     // Static class members.
     private static transferList: Transfer[] = [];
     private static transferDelay: number;
-    private static updateListener: ((list: Transfer[]) => void) | undefined = undefined;
+    private static updateListener: ((transfer: Transfer) => void) | undefined = undefined;
     
     // Class members.
     filepath: string;
@@ -46,14 +46,14 @@ export default class Transfer {
      */
     public async completeTransfer() {
         this.status = TransferStatus.Uploading;
-        Transfer.invokeTransferListUpdate();
+        Transfer.invokeTransferListUpdate(this);
         
         // do aws transfer stuff
         console.log(`uploading ${this.filepath} to AWS`);
 
         this.status = TransferStatus.Complete;
         this.dateCompleted = new Date();
-        Transfer.invokeTransferListUpdate();
+        Transfer.invokeTransferListUpdate(this);
     }
 
     /**
@@ -66,19 +66,20 @@ export default class Transfer {
     }
 
     /**
-     * Registers the update listener callback function that is called whenever a UI update of the transfer list is invoked.
-     * @param callback the callback function that will be called whenever a UI update is invoked.
+     * Registers the update listener callback function that is called whenever a Transfer is updated.
+     * @param callback the callback function that will be called whenever a Transfer is updated
      */
-    public static registerUpdateListener(callback: (list: Transfer[]) => void) {
+    public static registerUpdateListener(callback: (transfer: Transfer) => void) {
         Transfer.updateListener = callback;
     }
 
     /**
-     * Invokes a UI transfer list update by calling Transfer.updateListner.
+     * Invokes a UI update of a given Transfer by calling Transfer.updateListner.
      */
-    public static invokeTransferListUpdate() {
+    public static async invokeTransferListUpdate(transfer: Transfer) {
         if (Transfer.updateListener) {
-            Transfer.updateListener(Transfer.stripTimersFromTransferList(Transfer.transferList));
+            transfer.timeout = undefined;
+            Transfer.updateListener(transfer);
         }
     }
 
@@ -109,12 +110,15 @@ export default class Transfer {
         fileTransfer.cancelDelayTimer();
         fileTransfer.dateCompleted = undefined;
 
+        // Set the transfer status to InQueue.
+        fileTransfer.status = TransferStatus.InQueue;
+
         // If there is a transfer delay set we will complete the transfer once the delay has been executed. If not we will complete the transfer immediately.
         if (Transfer.transferDelay > 0) {
-            Transfer.invokeTransferListUpdate();
+            Transfer.invokeTransferListUpdate(fileTransfer);
             fileTransfer.timeout = setTimeout(async () => {
                 await fileTransfer!.completeTransfer();
-            }, Transfer.transferDelay * Transfer.MILLISECONDS_PER_MINUTE);
+            }, Transfer.transferDelay * Transfer.MILLISECONDS_PER_SECOND);
         }
         else {
             await fileTransfer.completeTransfer();
@@ -146,27 +150,17 @@ export default class Transfer {
      * @param filter the filter to apply to the transfer list. Options include [All, InQueue, Uploading, Complete]
      * @returns the transfer list with the filter applied
      */
-    static getTransferList(filter: string): Transfer[] {
+    static getTransferList(filter: TransferStatus | undefined): Transfer[] {
         let returnTransferList = Transfer.transferList;
         
         // Applies the given filter to the transfer list.
-        switch (filter) {
-            case 'InQueue': {
-                returnTransferList = returnTransferList.filter((transfer) => transfer.status === TransferStatus.InQueue);
-                break;
-            }
-            case 'Uploading': {
-                returnTransferList = returnTransferList.filter((transfer) => transfer.status === TransferStatus.Uploading);
-                break;
-            }
-            case 'Completed': {
-                returnTransferList = returnTransferList.filter((transfer) => transfer.status === TransferStatus.Complete);
-                break;
-            }
-            default:
-                break;
-        }
-    
+        if (filter === TransferStatus.InQueue)
+            returnTransferList = returnTransferList.filter((transfer) => transfer.status === TransferStatus.InQueue);
+        else if (filter === TransferStatus.Uploading)
+            returnTransferList = returnTransferList.filter((transfer) => transfer.status === TransferStatus.Uploading);
+        else if (filter === TransferStatus.Complete)
+            returnTransferList = returnTransferList.filter((transfer) => transfer.status === TransferStatus.Complete);
+
         return Transfer.stripTimersFromTransferList(returnTransferList);
     }
 
