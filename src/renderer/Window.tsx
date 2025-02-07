@@ -32,7 +32,6 @@ function Window(): JSX.Element {
 
   return (
     <div className="app">
-      <h2>window</h2>
       <Navbar active={activePage} handler={setActive} />
       {pageContent}
     </div>

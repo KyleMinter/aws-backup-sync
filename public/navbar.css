@@ -1,0 +1,46 @@
+.navbar {
+    display: flex;
+    flex-flow: row nowrap;
+    align-content: center;
+    justify-content: center;
+
+    width: 60%;
+    height: 5%;
+
+    border: 1px solid;
+    border-radius: 15px;
+
+    padding: 15px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.navbar-button {
+    flex-grow: 1;
+    flex-shrink: 0;
+    flex-basis: 0;
+
+    padding-bottom: 10px;
+    margin-left: 5px;
+    margin-right: 5px;
+
+    font-size: 90%;
+    text-align: center;
+
+    background-color: transparent;
+    border-bottom: 2px solid;
+
+    /* These properties will be overidden whenever a given navbar button is active. */
+    font-weight: normal;
+    border-color: transparent;
+}
+
+.navbar-active {
+    font-weight: bold !important;
+    border-color: transparent transparent aqua transparent !important;
+}
+
+.navbar-icon {
+    font-size: 2rem;
+    display: block;
+}

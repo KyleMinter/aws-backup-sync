@@ -9,6 +9,7 @@ import Transfer, { TransferStatus } from './transfers';
 let singleInstanceLock: boolean;
 let tray: Electron.Tray | undefined;
 let window: Electron.BrowserWindow | undefined;
+let isAppQuitting = false;
 
 /**
  * Creates the tray icon for the application.
@@ -36,12 +37,16 @@ async function createWindow() {
   const displayHeight = display.bounds.height;
 
   // The desired size of the window in relation to the screen size.
-  const windowWidth = .60;
-  const windowHeight = .75;
+  const diplayWidthPercentage = .36;
+  const displayHeightPercentage = .80;
+
+  // The ultimate width and height of the window. This is done to ensure the window doesn't get too small.
+  const windowWidth = Math.max(displayWidth * diplayWidthPercentage, 690);
+  const windowHeight = Math.min(Math.max(displayHeight * displayHeightPercentage, 860), displayHeight);
   
   window = new BrowserWindow({
-    width: displayWidth * windowWidth,
-    height: displayHeight * windowHeight,
+    width: windowWidth,
+    height: windowHeight,
     show: false,
     frame: true,
     fullscreenable: false,
@@ -60,8 +65,11 @@ async function createWindow() {
   await window.loadFile('index.html');
 
   // Hide the window when it loses focus.
-  window.on('blur', () => {
-    //window!.hide();
+  window.on('close', (e) => {
+    if (!isAppQuitting) {
+      e.preventDefault();
+      window!.hide();
+    }
   });
 }
 
@@ -75,11 +83,10 @@ function toggleWindow() {
     window!.show();
   }
   else {
-    if (window.isVisible()) {
-      // window.hide();
-    }
+    if (window.isVisible())
+      window.hide();
     else
-        window.show();
+      window.show();
   }
 }
 
@@ -113,6 +120,7 @@ app.on('second-instance', () => {
 })
 
 function handleQuit() {
+  isAppQuitting = true;
   app.quit();
 }
 
