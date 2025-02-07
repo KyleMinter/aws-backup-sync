@@ -45,9 +45,8 @@ function Transfers(): JSX.Element {
     }, [transferList, selectedFilter, handleTransferUpdate]);
 
     return (
-        <div className="app">
-            <h4>Transfers</h4>
-            <div className="folder-list">
+        <div className="transfers-container">
+            <div className="transfer-list">
                 {transferList.map(transferInstance => (
                     <TransferInstance transfer={transferInstance}/>
                 ))}

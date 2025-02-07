@@ -1,3 +1,7 @@
 .app {
   color: grey;
 }
+
+.window-header {
+  text-align: center;
+}

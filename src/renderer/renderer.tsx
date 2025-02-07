@@ -4,6 +4,7 @@
 // Import the styles here to process them with webpack
 import '_public/style.css';
 import '_public/navbar.css';
+import '_public/about.css';
 
 import * as React from 'react';
 import { createRoot } from 'react-dom/client';

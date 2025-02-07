@@ -75,8 +75,7 @@ function Preferences(): JSX.Element {
   }
 
   return (
-    <div className="app">
-      <h1>Preferences</h1>
+    <div className="preferences-container">
       <div>
         <h2>AWS Credentials</h2>
         <form>

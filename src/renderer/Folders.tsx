@@ -107,8 +107,7 @@ function Folders(): JSX.Element {
     }
 
     return (
-        <div className="app">
-            <h4>Synced Folders</h4>
+        <div className="folders-container">
             <div className="folder-list">
                 {watcherList.map(watcherInstance => (
                     <FolderWatcher watcher={watcherInstance} toggleHandler={handleWatcherToggle} selectionHandler={handleWatcherSelect} />

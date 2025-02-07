@@ -1,6 +1,6 @@
-import * as path from 'path';
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { BrowserWindow, Tray, Menu, nativeImage, screen, app, ipcMain, dialog } from 'electron';
+import * as path from 'path';
+import { BrowserWindow, Tray, Menu, nativeImage, screen, app, ipcMain, dialog, shell } from 'electron';
 import * as nodeEnv from '_utils/node-env';
 import * as store from './store';
 import Watcher from './watcher';
@@ -16,7 +16,7 @@ let isAppQuitting = false;
  */
 const createTray = () => {
   // Create the tray icon.
-  const icon = nativeImage.createFromPath('public/assets/cat.jpg')
+  const icon = nativeImage.createFromPath('public/assets/logo.png');
   tray = new Tray(icon);
   tray.setToolTip('app');
 
@@ -44,9 +44,13 @@ async function createWindow() {
   const windowWidth = Math.max(displayWidth * diplayWidthPercentage, 690);
   const windowHeight = Math.min(Math.max(displayHeight * displayHeightPercentage, 860), displayHeight);
   
+  // Get the icon for the app.
+  const icon = nativeImage.createFromPath('public/assets/logo.png');
+
   window = new BrowserWindow({
     width: windowWidth,
     height: windowHeight,
+    icon: icon,
     show: false,
     frame: true,
     fullscreenable: false,
@@ -63,6 +67,12 @@ async function createWindow() {
 
   // and load the index.html of the app.
   await window.loadFile('index.html');
+
+  // Open links using the system's default browser instead of attempting to open them from within this app window.
+  window.webContents.setWindowOpenHandler(({ url }) => {
+    shell.openExternal(url);
+    return { action: 'deny' };
+  })
 
   // Hide the window when it loses focus.
   window.on('close', (e) => {
