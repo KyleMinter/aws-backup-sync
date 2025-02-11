@@ -13,22 +13,25 @@ function Preferences(): JSX.Element {
   const preferences = [s3_BucketName, s3_ObjectKey, s3_awsRegion, openOnStartup, transferDelay];
 
   useEffect(() => {
-    async function fetchPreferences() {
-      const awsCredentials = await window.ipcAPI?.storeGet('awsCredentials');
-      setS3BucketName({value: awsCredentials.s3_BucketName, stored: awsCredentials.s3_BucketName});
-      setS3ObjectKey({value: awsCredentials.s3_ObjectKey, stored: awsCredentials.s3_ObjectKey});
-      setS3AWSRegion({value: awsCredentials.s3_awsRegion, stored: awsCredentials.s3_awsRegion});
-  
-      const preferences = await window.ipcAPI?.storeGet('preferences');
-      setOpenOnStartup({value: preferences.openOnStartup, stored: preferences.openOnStartup});
-      setTransferDelay({value: preferences.transferDelay, stored: preferences.transferDelay});
-    }
-
     if (!didFetch) {
       setDidFetch(true);
       fetchPreferences();
     }
   });
+
+  /**
+   * Fetches the preferences from the store.
+   */
+  async function fetchPreferences() {
+    const awsCredentials = await window.ipcAPI?.storeGet('awsCredentials');
+    setS3BucketName({value: awsCredentials.s3_BucketName, stored: awsCredentials.s3_BucketName});
+    setS3ObjectKey({value: awsCredentials.s3_ObjectKey, stored: awsCredentials.s3_ObjectKey});
+    setS3AWSRegion({value: awsCredentials.s3_awsRegion, stored: awsCredentials.s3_awsRegion});
+
+    const preferences = await window.ipcAPI?.storeGet('preferences');
+    setOpenOnStartup({value: preferences.openOnStartup, stored: preferences.openOnStartup});
+    setTransferDelay({value: preferences.transferDelay, stored: preferences.transferDelay});
+  }
 
   /**
    * Saves the edited preferences from the UI to the store so that they actually take effect.
@@ -46,6 +49,11 @@ function Preferences(): JSX.Element {
       transferDelay: transferDelay?.value
     }
     await window.ipcAPI?.storeSet('preferences', preferences);
+    
+    // Set didFetch to false so that the stored values of all the preferences are updated.
+    // This is done so that the UI input fields aren't marked as changed after saving the initial changes.
+    // This could be done without fetching the preferences, but that sounds like a lot of work and I'm lazy so fuck it. ¯\_(ツ)_/¯
+    setDidFetch(false);
   }
 
   /**
