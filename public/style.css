@@ -2,6 +2,10 @@
   color: grey;
 }
 
+.window-container {
+  padding: 15px;
+}
+
 .window-header {
   text-align: center;
 }

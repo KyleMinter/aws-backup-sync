@@ -5,6 +5,7 @@
 import '_public/style.css';
 import '_public/navbar.css';
 import '_public/about.css';
+import '_public/preferences.css';
 
 import * as React from 'react';
 import { createRoot } from 'react-dom/client';

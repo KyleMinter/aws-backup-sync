@@ -31,7 +31,7 @@ function Window(): JSX.Element {
   }
 
   return (
-    <div>
+    <div className="window-container">
       <Navbar active={activePage} handler={setActive} />
       <div className="window-header">
         <h1>{activePage}</h1>

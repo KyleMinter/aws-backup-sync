@@ -118,7 +118,7 @@ export default class Transfer {
             Transfer.invokeTransferListUpdate(fileTransfer);
             fileTransfer.timeout = setTimeout(async () => {
                 await fileTransfer!.completeTransfer();
-            }, Transfer.transferDelay * Transfer.MILLISECONDS_PER_SECOND);
+            }, Transfer.transferDelay * Transfer.MILLISECONDS_PER_MINUTE);
         }
         else {
             await fileTransfer.completeTransfer();

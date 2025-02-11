@@ -1,0 +1,58 @@
+.preferences-container {
+    width: 75%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.preferences-container > div {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+.preferences-form {
+    margin-top: 15px;
+    padding: 15px;
+
+    border: 1px solid;
+    border-radius: 15px;
+}
+
+.preferences-label {
+    display: flex;
+    align-content: center;
+}
+
+.preferences-label > div {
+    width: 35%;
+}
+
+.preferences-label > div > span {
+    color: red !important;
+}
+
+.preferences-label > input[type=text] {
+    flex-grow: 1;
+    padding-top: 3px;
+    padding-bottom: 3px;
+}
+
+.preferences-label > input[type=checkbox] {
+    transform: scale(1.35);
+}
+
+.preferences-label > input[type=number] {
+    width: 50px;
+}
+
+.preferences-submit-container {
+    margin-top: 15px;
+}
+
+.preferences-submit-buttons {
+    display: flex;
+    justify-content: left;
+}
+
+.preferences-submit-buttons > button {
+    margin: 5px;
+}
