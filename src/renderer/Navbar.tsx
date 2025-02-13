@@ -9,14 +9,14 @@ interface NavbarProps {
 }
 
 function Navbar(props: NavbarProps): JSX.Element {
-  return (
-    <div className="navbar">
-        <NavbarButton title="About" active={(props.active === 'About')} onClick={props.handler} />
-        <NavbarButton title="Preferences" active={(props.active === 'Preferences')} onClick={props.handler} />
-        <NavbarButton title="Folders" active={(props.active === 'Folders')} onClick={props.handler} />
-        <NavbarButton title="Transfers" active={(props.active === 'Transfers')} onClick={props.handler} />
-    </div>
-  );
+    return (
+        <div className="navbar">
+            <NavbarButton title="About" active={(props.active === 'About')} onClick={props.handler} />
+            <NavbarButton title="Preferences" active={(props.active === 'Preferences')} onClick={props.handler} />
+            <NavbarButton title="Folders" active={(props.active === 'Folders')} onClick={props.handler} />
+            <NavbarButton title="Transfers" active={(props.active === 'Transfers')} onClick={props.handler} />
+        </div>
+    );
 }
 
 interface NavbarButtonProps {

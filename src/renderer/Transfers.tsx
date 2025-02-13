@@ -12,7 +12,7 @@ function Transfers(): JSX.Element {
     const handleTransferUpdate = useCallback((transfer: Transfer) => {
         if (selectedFilter === undefined) {
             // If a there is no filter applied and the transfer is already in the list, we will update the Transfer element.
-            if (transferList.some(e => e.filepath === transfer.filepath))
+            if (transferList.some((e) => e.filepath === transfer.filepath))
                 setTransferList(transferList.map((element) => element.filepath === transfer.filepath ? transfer : element));
             // If a there is no filter applied and the transfer is already in the list, we will add the Transfer to the list.
             else

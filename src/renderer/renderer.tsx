@@ -14,6 +14,5 @@ import { createRoot } from 'react-dom/client';
 import Window from '_renderer/Window';
 
 const container = document.body;
-// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-const root = createRoot(container!);
+const root = createRoot(container);
 root.render(<Window />);
