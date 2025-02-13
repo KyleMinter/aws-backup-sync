@@ -1,11 +1,26 @@
-.app {
-  color: grey;
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
 }
 
-.window-container {
-  padding: 15px;
+* {
+  box-sizing: border-box;
 }
 
-.window-header {
-  text-align: center;
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: black;
+  -webkit-border-radius: 1ex;
+}
+
+::-webkit-scrollbar-track-piece:end {
+  margin-bottom: 15px;
+}
+
+::-webkit-scrollbar-track-piece:start {
+  margin-top: 15px;
 }

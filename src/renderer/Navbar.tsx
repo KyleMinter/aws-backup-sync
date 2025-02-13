@@ -41,8 +41,10 @@ export function NavbarButton(props: NavbarButtonProps): JSX.Element {
 
     return (
         <button className={classes} onClick={() => props.onClick(props.title)}>
-            <span className="navbar-icon">{icon}</span>
-            <span>{props.title}</span>
+            <div>
+                <span className="navbar-icon">{icon}</span>
+                <span>{props.title}</span>
+            </div>
         </button>
     );
 }

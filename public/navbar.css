@@ -4,8 +4,8 @@
     align-content: center;
     justify-content: center;
 
-    width: 60%;
-    height: 5%;
+    width: 62%;
+    height: 60%;
 
     border: 1px solid;
     border-radius: 15px;
@@ -16,9 +16,7 @@
 }
 
 .navbar-button {
-    flex-grow: 1;
-    flex-shrink: 0;
-    flex-basis: 0;
+    flex: 1 0 0;
 
     padding-bottom: 10px;
     margin-left: 5px;
@@ -33,6 +31,11 @@
     /* These properties will be overidden whenever a given navbar button is active. */
     font-weight: normal;
     border-color: transparent;
+}
+
+.navbar-button > div {
+    display: flex;
+    flex-flow: column;
 }
 
 .navbar-active {

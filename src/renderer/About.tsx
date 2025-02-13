@@ -9,9 +9,11 @@ function About(): JSX.Element {
       </div>
       <hr />
       <div className="about-links">
-        <p>Author: Kyle Minter</p>
-        <p>Github: <a href="https://github.com/KyleMinter/aws-backup-sync" target="_blank">https://github.com/KyleMinter/aws-backup-sync</a></p>
-        <p>Portfolio: <a href="https://kyleminter.github.io" target="_blank">https://kyleminter.github.io</a></p>
+        <div>
+          <p>Author: Kyle Minter</p>
+          <p>Github: <a href="https://github.com/KyleMinter/aws-backup-sync" target="_blank">https://github.com/KyleMinter/aws-backup-sync</a></p>
+          <p>Portfolio: <a href="https://kyleminter.github.io" target="_blank">https://kyleminter.github.io</a></p>
+        </div>
       </div>
     </div>
   );

@@ -32,12 +32,14 @@ function Window(): JSX.Element {
 
   return (
     <div className="window-container">
-      <Navbar active={activePage} handler={setActive} />
       <div className="window-header">
+        <Navbar active={activePage} handler={setActive} />
         <h1>{activePage}</h1>
         <hr />
       </div>
-      {pageContent}
+      <div className="window-body">
+        {pageContent}
+      </div>
     </div>
   );
 }

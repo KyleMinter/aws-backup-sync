@@ -4,6 +4,8 @@ import Watcher from '_main/watcher';
 import ipcApi from '_/preload/ipc-api';
 
 function Folders(): JSX.Element {
+    const [didFetch, setDidFetch] = useState(false);
+
     const [watcherList, setWatcherList] = useState<Watcher[]>([]);
     const [selectedWatchers, setSelectedWatchers] = useState<Watcher[]>([]);
     const [isPopupOpen, setPopupOpen] = useState(false);
@@ -14,8 +16,11 @@ function Folders(): JSX.Element {
     const [errorMessages, setErrorMessages] = useState<string[]>([]);
 
     useEffect(() => {
-        fetchWatcherList();
-    }, []);
+        if (!didFetch) {
+            setDidFetch(true);
+            fetchWatcherList();
+        }
+    }, [didFetch]);
 
     // Fetches the list of watchers.
     async function fetchWatcherList() {
@@ -29,7 +34,8 @@ function Folders(): JSX.Element {
     // Handle toggling of a watcher instance.
     function handleWatcherToggle(watcher: Watcher) {
         window.ipcAPI?.toggleWatcherInstance(watcher);
-        fetchWatcherList();
+        //fetchWatcherList();
+        setDidFetch(false);
     }
 
     // Handle selection of a watcher instance.
@@ -54,7 +60,8 @@ function Folders(): JSX.Element {
 
             // Empty the selected watchers list and refetch the new watcher list from storage.
             setSelectedWatchers([]);
-            fetchWatcherList();
+            //fetchWatcherList();
+            setDidFetch(false);
         }
     }
 
@@ -108,13 +115,27 @@ function Folders(): JSX.Element {
 
     return (
         <div className="folders-container">
-            <div className="folder-list">
-                {watcherList.map(watcherInstance => (
-                    <FolderWatcher watcher={watcherInstance} toggleHandler={handleWatcherToggle} selectionHandler={handleWatcherSelect} />
-                ))}
+            <div className="folders-body">
+                <div className="folders-list">
+                    <table>
+                        <tr>
+                            <th>Enabled</th>
+                            <th>Name</th>
+                            <th>Directory Path</th>
+                        </tr>
+                        {watcherList.map(watcherInstance => (
+                            <FolderWatcher watcher={watcherInstance} toggleHandler={handleWatcherToggle} selectionHandler={handleWatcherSelect} />
+                        ))}
+                    </table>
+                </div>
+                <div className="folders-add-remove-container">
+                    <hr />
+                    <div>
+                        <button type="button" onClick={() => setPopupOpen(true)}>Add</button>
+                        <button type="button" onClick={onWatcherDelete}>Delete</button>
+                    </div>
+                </div>
             </div>
-            <button type="button" onClick={() => setPopupOpen(true)}>Add</button>
-            <button type="button" onClick={onWatcherDelete}>Delete</button>
             <Modal
                 isOpen={isPopupOpen}
                 onRequestClose={() => setPopupOpen(false)}
@@ -166,12 +187,14 @@ function FolderWatcher(props: FolderWatcherProps): JSX.Element {
         props.selectionHandler(props.watcher);
     }
 
+    const classes = '' + (selected ? 'selected ' : '') + (props.watcher.enabled ? '' : 'disabled');
+
     return (
-        <div className={"folder-watcher" + (selected ? "active" : "")} onClick={handleClick} style={{backgroundColor: selected ? 'lightblue' : 'white'}}>
-            <input type="checkbox" checked={props.watcher.enabled} onChange={() => props.toggleHandler(props.watcher)} />
-            <p>{props.watcher.name}</p>
-            <p>{props.watcher.dirpath}</p>
-        </div>
+        <tr className={classes} onClick={handleClick}>
+            <td><input type="checkbox" checked={props.watcher.enabled} onChange={() => props.toggleHandler(props.watcher)} /></td>
+            <td>{props.watcher.name}</td>
+            <td>{props.watcher.dirpath}</td>
+        </tr>
     )
 }
 

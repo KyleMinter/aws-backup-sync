@@ -101,7 +101,7 @@ function Preferences(): JSX.Element {
   });
 
   return (
-    <div className="preferences-container">
+    <div>
       <div>
         <h2>AWS Credentials</h2>
         <hr />

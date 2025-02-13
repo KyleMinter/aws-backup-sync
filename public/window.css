@@ -1,0 +1,36 @@
+.window-container {
+    height: 100%;
+    display: grid;
+    grid-template-areas: 
+        "window-header"
+        "window-body";
+    grid-template-rows: 20% 80%;
+    gap: 0;
+
+    padding: 15px;
+
+    color: grey;
+}
+
+.window-header {
+    height: 100%;
+    grid-area: window-header;
+    text-align: center;
+}
+
+.window-header > h1 {
+    margin-top: .4em;
+    margin-bottom: .4em;
+}
+
+.window-body {
+    grid-area: window-body;
+
+    width: 75%;
+
+    margin-left: auto;
+    margin-right: auto;
+
+    padding-left: 15px;
+    padding-right: 15px;
+}

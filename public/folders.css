@@ -1,0 +1,56 @@
+.folders-container {
+    /* This is required in order for the table to overflow rather than the entire page */
+    height: 100%;
+    margin-top: 15px;
+}
+
+.folders-body {
+    max-height: 100%;
+    display: flex;
+    flex-flow: column;
+}
+
+.folders-list {
+    max-height: 90%;
+    border: 1px solid;
+    border-radius: 15px;
+    padding: 15px;
+
+    overflow-y: auto;
+}
+
+table {
+    width: 100%;
+    min-height: 0;
+    border-collapse:collapse;
+    text-align: center;
+}
+
+th {
+    background-color: white;
+    position: sticky;
+    top: 0;
+    border-bottom: 1px solid;
+}
+
+.disabled {
+    background-color: #ffcccc;
+}
+
+.selected {
+    background-color: #b3e0ff !important;
+}
+
+.folders-add-remove-container {
+    flex: 1 1 10%;
+    margin-top: 8px;
+}
+
+.folders-add-remove-container > div {
+    display: flex;
+    justify-content: left;
+}
+
+.folders-add-remove-container > div > button {
+    margin: 5px;
+}

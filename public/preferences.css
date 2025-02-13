@@ -1,14 +1,3 @@
-.preferences-container {
-    width: 75%;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.preferences-container > div {
-    padding-left: 15px;
-    padding-right: 15px;
-}
-
 .preferences-form {
     margin-top: 15px;
     padding: 15px;

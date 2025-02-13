@@ -40,8 +40,8 @@ export default class Watcher {
      * Initializes the watcher from storage and registers the required event listeners.
      */
     static initializeWatchers() {
-        Watcher.watcherList = chokidar.watch(store.getAllWatchersFromStore().map((watcher: Watcher) => watcher.dirpath), Watcher.watcherOptions);
-        Watcher.watcherList.on('all', Watcher.onAll);
+        //Watcher.watcherList = chokidar.watch(store.getAllWatchersFromStore().map((watcher: Watcher) => watcher.dirpath), Watcher.watcherOptions);
+        //Watcher.watcherList.on('all', Watcher.onAll);
     }
     
     /**
