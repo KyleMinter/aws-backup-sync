@@ -23,15 +23,15 @@ const schema = {
         properties: {
             s3_BucketName: {
                 type: 'string',
-                default: ''
+                default: 'S3 Bucket Name'
             },
             s3_ObjectKey: {
                 type: 'string',
-                default: ''
+                default: 'S3 Object Key'
             },
             s3_awsRegion: {
                 type: 'string',
-                default: ''
+                default: 'AWS Region'
             },
         },
         default: {}
@@ -41,13 +41,14 @@ const schema = {
         properties: {
             openOnStartup: {
                 type: 'boolean',
-                default: 'true'
+                default: true
             },
             transferDelay: {
                 type: 'integer',
                 default: 0
             }
-        }
+        },
+        default: {}
     },
     watchers: {
         type: 'array',
@@ -68,7 +69,7 @@ const schema = {
                 }
             }
         },
-        default: [{name: '', dirpath: ''}]
+        default: []
     }
 } as const;
 
