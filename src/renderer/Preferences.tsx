@@ -92,13 +92,7 @@ function Preferences(): JSX.Element {
     }
 
     // Determines if any of the preferences have changed.
-    let preferencesChanged = false;
-    preferences.every((preference) => {
-        if (preference?.value !== preference?.stored) {
-            preferencesChanged = true;
-            return false;
-        }
-    });
+    const preferencesChanged = !(preferences.every((preference) => preference?.value === preference?.stored));
 
     return (
         <div>
