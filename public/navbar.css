@@ -13,6 +13,8 @@
     padding: 15px;
     margin-left: auto;
     margin-right: auto;
+
+    background-color: white;
 }
 
 .navbar-button {
@@ -40,7 +42,7 @@
 
 .navbar-active {
     font-weight: bold !important;
-    border-color: transparent transparent aqua transparent !important;
+    border-color: transparent transparent #0075ff transparent !important;
 }
 
 .navbar-icon {

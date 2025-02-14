@@ -5,7 +5,7 @@ function About(): JSX.Element {
         <div className="about-container">
             <div className="about-main-content">
                 <p>AWS Backup Sync is a cross compatible electron tray app that automatically watches and backup/syncs user specified directories to cloud storage. It includes various user preference options and leverages AWS S3 as a cloud storage provider.</p>
-                <p>This app was built using Electron, React, AWS, and other various libraries which you can find on the github page.</p>
+                <p>This app was built using Electron, React, AWS, and other various dependencies which you can find on this project's github repo.</p>
             </div>
             <hr />
             <div className="about-links">

@@ -4,21 +4,20 @@
     grid-template-areas: 
         "window-header"
         "window-body";
-    grid-template-rows: 20% 80%;
+    grid-template-rows: 23% 77%;
     gap: 0;
-
-    padding: 15px;
-
-    color: grey;
 }
 
 .window-header {
     height: 100%;
     grid-area: window-header;
     text-align: center;
+    background-color: #0075ff;
+    padding-top: 30px;
 }
 
 .window-header > h1 {
+    color: white;
     margin-top: .4em;
     margin-bottom: .4em;
 }
@@ -33,4 +32,5 @@
 
     padding-left: 15px;
     padding-right: 15px;
+    padding-bottom: 15px;
 }
