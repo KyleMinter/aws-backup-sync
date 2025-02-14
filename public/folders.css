@@ -54,3 +54,77 @@ th {
 .folders-add-remove-container > div > button {
     margin: 5px;
 }
+
+.modal-container {
+    position: absolute;
+    top: 30%;
+    left: 15%;
+    right: 15%;
+    bottom: 30%;
+    
+    color: grey;
+    background-color: white;
+
+
+    border: 1px solid;
+    border-radius: 15px;
+
+    padding: 15px;
+}
+
+.modal-container > h2 {
+    margin-top: .4em;
+    text-align: center;
+}
+
+.modal-form {
+    margin-top: 15px;
+    padding: 15px;
+
+    border: 1px solid;
+    border-radius: 15px;
+}
+
+.modal-label {
+    display: flex;
+    align-content: center;
+}
+
+.modal-label > div {
+    width: 25%;
+}
+
+.modal-label > div > span {
+    color: red !important;
+}
+
+.modal-label > button {
+    margin-left: 5px;
+}
+
+.modal-label > input[type=text] {
+    flex-grow: 1;
+    padding-top: 3px;
+    padding-bottom: 3px;
+}
+
+.modal-label > input[type=checkbox] {
+    transform: scale(1.35);
+}
+
+.modal-submit-container {
+    margin-top: 15px;
+}
+
+.modal-submit-container > div {
+    display: flex;
+    justify-content: left;
+}
+
+.modal-submit-container > div > button {
+    margin: 5px;
+}
+
+.modal-submit-container > p {
+    color: red !important;
+}

@@ -137,36 +137,44 @@ function Folders(): JSX.Element {
                 </div>
             </div>
             <Modal
+                className="modal-container"
+                overlayClassName="modal-overlay"
                 isOpen={isPopupOpen}
                 onRequestClose={() => setPopupOpen(false)}
             >
-                <h1>Add New Folder</h1>
-                <p>wasd</p>
-                <form>
-                    <label>
-                        Name:
-                        <input type="text" value={newWatcherInstanceName} onChange={(e) => setWatcherInstanceName(e.target.value)} />
+                <h2>Add New Folder</h2>
+                <hr />
+                <form className="modal-form">
+                    <label className="modal-label">
+                        <div>Name:</div>
+                        <input
+                            type="text"
+                            value={newWatcherInstanceName}
+                            onChange={(e) => setWatcherInstanceName(e.target.value)}
+                        />
                     </label>
                     <br />
-                    <label>
-                        Folder Path:
+                    <label className="modal-label">
+                        <div>Folder Path:</div>
                         <input type="text" readOnly={true} value={newWatcherInstancePath} />
                         <button type="button" onClick={() => fetchWatcherInstancePath()}>Search</button>
                     </label>
                     <br />
-                    <label>
-                        Enabled:
+                    <label className="modal-label">
+                        <div>Enabled:</div>
                         <input type="checkbox" checked={newWatcherInstanceEnabled} onChange={(e) => setWatcherInstanceEnabled(e.target.checked)} />
                     </label>
-                    <br />
-
-                    {errorMessages.length !== 0 && errorMessages.map(message => (
-                        <p>{message}<br /></p>
-                    ))}
-
-                    <button type="button" onClick={onWatcherAdd}>Confirm</button>
-                    <button type="button" onClick={() => {setErrorMessages([]); setPopupOpen(false);}}>Cancel</button>
                 </form>
+                <div className="modal-submit-container">
+                    <hr />
+                    <p>{errorMessages.length !== 0 && errorMessages.map(message => (
+                        <span>{message + ' '}</span>
+                    ))}</p>
+                    <div>
+                        <button type="button" onClick={onWatcherAdd}>Confirm</button>
+                        <button type="button" onClick={() => {setErrorMessages([]); setPopupOpen(false);}}>Cancel</button>
+                    </div>
+                </div>
             </Modal>
         </div>
     );
