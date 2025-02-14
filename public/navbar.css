@@ -29,10 +29,17 @@
 
     background-color: transparent;
     border-bottom: 2px solid;
+    border-radius: 15px 15px 0px 0px;
 
     /* These properties will be overidden whenever a given navbar button is active. */
     font-weight: normal;
     border-color: transparent;
+}
+
+.navbar-button:hover {
+    background-color: #f2f2f2;
+    transition: background-color 150ms linear;
+    border-color: transparent transparent #d9d9d9 transparent !important;
 }
 
 .navbar-button > div {
