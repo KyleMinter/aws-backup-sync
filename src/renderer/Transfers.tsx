@@ -43,33 +43,50 @@ function Transfers(): JSX.Element {
         setUpdateCallback();
         fetchTransferList();
     }, [transferList, selectedFilter, handleTransferUpdate]);
-
+    
     return (
         <div className="transfers-container">
-            <div className="transfer-list">
-                {transferList.map(transferInstance => (
-                    <TransferInstance transfer={transferInstance}/>
-                ))}
+            <div className="transfers-filter-container">
+                <form>
+                    <h3>Filter:</h3>
+                    <div>
+                        <label>
+                            <input type="radio" checked={selectedFilter === undefined} onChange={() => setSelectedFilter(undefined)} />
+                            All
+                        </label>
+                        <label>
+                            <input type="radio" checked={selectedFilter === TransferStatus.InQueue} onChange={() => setSelectedFilter(TransferStatus.InQueue)} />
+                            In Queue
+                        </label>
+                        <label>
+                            <input type="radio" checked={selectedFilter === TransferStatus.Uploading} onChange={() => setSelectedFilter(TransferStatus.Uploading)} />
+                            Uploading
+                        </label>
+                        <label>
+                            <input type="radio" checked={selectedFilter === TransferStatus.Complete} onChange={() => setSelectedFilter(TransferStatus.Complete)} />
+                            Completed
+                        </label>
+                    </div>
+                    <hr />
+                </form>
             </div>
-            <form>
-                <h4>Filter:</h4>
-                <label>
-                    All
-                    <input type="radio" checked={selectedFilter === undefined} onChange={() => setSelectedFilter(undefined)} />
-                </label>
-                <label>
-                    In Queue
-                    <input type="radio" checked={selectedFilter === TransferStatus.InQueue} onChange={() => setSelectedFilter(TransferStatus.InQueue)} />
-                </label>
-                <label>
-                    Uploading
-                    <input type="radio" checked={selectedFilter === TransferStatus.Uploading} onChange={() => setSelectedFilter(TransferStatus.Uploading)} />
-                </label>
-                <label>
-                    Completed
-                    <input type="radio" checked={selectedFilter === TransferStatus.Complete} onChange={() => setSelectedFilter(TransferStatus.Complete)} />
-                </label>
-            </form>
+            <div className="transfers-list">
+                <table className="transfers-table">
+                    <tr>
+                        <th>File</th>
+                        <th>Status</th>
+                        <th>Time Completed</th>
+                    </tr>
+                    {transferList.length > 0 && transferList.map(transferInstance => (
+                        <TransferInstance transfer={transferInstance}/>
+                    ))}
+                </table>
+                {transferList.length === 0 && (
+                    <div className="transfers-empty">
+                        <p>There are no transfers.</p>
+                    </div>
+                )}
+            </div>
         </div>
     );
 }
@@ -80,11 +97,11 @@ interface TransferInstanceProps {
 
 function TransferInstance(props: TransferInstanceProps): JSX.Element {
     return (
-        <div>
-            <p>{props.transfer.filepath}</p>
-            <p>{TransferStatus[props.transfer.status]}</p>
-            <p>{props.transfer.dateCompleted !== undefined ? props.transfer.dateCompleted.toLocaleString() : 'N/A'}</p>
-        </div>
+        <tr>
+            <td>{props.transfer.filepath}</td>
+            <td>{TransferStatus[props.transfer.status]}</td>
+            <td>{props.transfer.dateCompleted !== undefined ? props.transfer.dateCompleted.toLocaleString() : 'N/A'}</td>
+        </tr>
     )
 }
 

@@ -110,6 +110,7 @@ function Folders(): JSX.Element {
             setWatcherInstanceEnabled(true);
             setErrorMessages([]);
             setPopupOpen(false);
+            setDidFetch(false);
         }
     }
 
@@ -117,16 +118,21 @@ function Folders(): JSX.Element {
         <div className="folders-container">
             <div className="folders-body">
                 <div className="folders-list">
-                    <table>
+                    <table className="folders-table">
                         <tr>
                             <th>Enabled</th>
                             <th>Name</th>
                             <th>Directory Path</th>
                         </tr>
-                        {watcherList.map(watcherInstance => (
+                        {watcherList.length > 0 && watcherList.map(watcherInstance => (
                             <FolderWatcher watcher={watcherInstance} toggleHandler={handleWatcherToggle} selectionHandler={handleWatcherSelect} />
                         ))}
                     </table>
+                    {watcherList.length === 0 && (
+                        <div className="folders-empty">
+                            <p>There are no watched folders.<br />Click the 'Add' button to add a folder.</p>
+                        </div>
+                    )}
                 </div>
                 <div className="folders-add-remove-container">
                     <hr />

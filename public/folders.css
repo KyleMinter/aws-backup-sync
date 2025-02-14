@@ -19,14 +19,14 @@
     overflow-y: auto;
 }
 
-table {
+.folders-table {
     width: 100%;
     min-height: 0;
     border-collapse:collapse;
     text-align: center;
 }
 
-th {
+.folders-table > tr > th {
     background-color: white;
     position: sticky;
     top: 0;
@@ -127,4 +127,8 @@ th {
 
 .modal-submit-container > p {
     color: red !important;
+}
+
+.folders-empty {
+    text-align: center;
 }

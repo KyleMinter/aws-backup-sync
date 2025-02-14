@@ -1,0 +1,50 @@
+.transfers-container {
+    /* This is required in order for the table to overflow rather than the entire page */
+    height: 100%;
+
+    padding-bottom: 15px;
+    max-height: 100%;
+    display: flex;
+    flex-flow: column;
+}
+
+.transfers-list {
+    max-height: 90%;
+    border: 1px solid;
+    border-radius: 15px;
+    padding: 15px;
+
+    overflow-y: auto;
+}
+
+.transfers-table {
+    width: 100%;
+    min-height: 0;
+    border-collapse:collapse;
+    text-align: center;
+}
+
+.transfers-table > tr > th {
+    background-color: white;
+    position: sticky;
+    top: 0;
+    border-bottom: 1px solid;
+}
+
+.transfers-filter-container {
+    flex: 0 0 10%;
+    margin-top: 8px;
+}
+
+.transfers-filter-container > div {
+    display: flex;
+    justify-content: left;
+}
+
+.transfers-filter-container > div > button {
+    margin: 5px;
+}
+
+.transfers-empty {
+    text-align: center;
+}
