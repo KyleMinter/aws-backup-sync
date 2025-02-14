@@ -48,8 +48,13 @@ async function onUpdateTransfer(callback: (transfer: Transfer) => void) {
     ipcRenderer.on('transfers:update', (_event, transfer) => callback(transfer));
 }
 
+// Electron API
+async function onUpdateNavbar(callback: (active: string) => void) {
+    ipcRenderer.on('electron:navbar', (_event, active) => callback(active));
+}
+
 async function openFileDialog(): Promise<OpenDialogReturnValue> {
     return await ipcRenderer.invoke('electron:openFileDialog');
 }
 
-export default { rendererReady, storeGet, storeSet, addWatcherInstance, removeWatcherInstance, toggleWatcherInstance, getAllWatchers, getTransferList, onUpdateTransfer, openFileDialog };
+export default { rendererReady, storeGet, storeSet, addWatcherInstance, removeWatcherInstance, toggleWatcherInstance, getAllWatchers, getTransferList, onUpdateTransfer, onUpdateNavbar, openFileDialog };

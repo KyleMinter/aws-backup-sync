@@ -22,6 +22,11 @@ const createTray = () => {
 
     // Build the context menu that is displayed when right clicking the tray icon.
     const contextMenu = Menu.buildFromTemplate([
+        { label: 'About', type: 'normal', click: () => invokeNavbarUpdateEvent('About') },
+        { label: 'Preferences', type: 'normal', click: () => invokeNavbarUpdateEvent('Preferences') },
+        { label: 'Folders', type: 'normal', click: () => invokeNavbarUpdateEvent('Folders') },
+        { label: 'Transfers', type: 'normal', click: () => invokeNavbarUpdateEvent('Transfers') },
+        { type: 'separator' },
         { label: 'Exit', type: 'normal', click: handleQuit }
     ])
     tray.setContextMenu(contextMenu)
@@ -164,7 +169,12 @@ function invokeUpdateTransfersEvent(transfer: Transfer) {
     window?.webContents.send('transfers:update', transfer);
 }
 
-// IPC handle for open file dialog function
+// IPC handle for electron related functions
+function invokeNavbarUpdateEvent(active: string) {
+    if (!window?.isVisible()) 
+        window?.show();
+    window?.webContents.send('electron:navbar', active);
+}
 ipcMain.handle('electron:openFileDialog', async (event) => {
     const window = BrowserWindow.fromWebContents(event.sender);
     if (window) {

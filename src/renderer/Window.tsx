@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import Navbar from './Navbar';
 import About from './About';
 import Preferences from './Preferences';
@@ -6,11 +6,20 @@ import Folders from './Folders';
 import Transfers from './Transfers';
 
 function Window(): JSX.Element {
+    const [activePage, setActive] = useState('About');
+    
+    const handleNavbarUpdate = useCallback((active: string) => {
+        setActive(active);
+    }, [activePage]);
+    
     useEffect(() => {
+        async function setUpdateCallback() {
+            await window.ipcAPI?.onUpdateNavbar(handleNavbarUpdate);
+        }
+
+        setUpdateCallback();
         window.ipcAPI?.rendererReady();
     }, []);
-
-    const [activePage, setActive] = useState('About');
 
     let pageContent;
     switch (activePage) {
