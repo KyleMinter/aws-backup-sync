@@ -1,15 +1,15 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import Transfer, { TransferStatus } from '_/main/transfers';
+import { TransferTemplate, TransferStatus } from '_/types/transfer';
 
 function Transfers(): JSX.Element {
-    const [transferList, setTransferList] = useState<Transfer[]>([]);
+    const [transferList, setTransferList] = useState<TransferTemplate[]>([]);
     const [selectedFilter, setSelectedFilter] = useState<TransferStatus | undefined>(undefined);
 
     /**
      * Callback function that is invoked whenever a Transfer has been updated.
      * @param transfer the updated transfer
      */
-    const handleTransferUpdate = useCallback((transfer: Transfer) => {
+    const handleTransferUpdate = useCallback((transfer: TransferTemplate) => {
         if (selectedFilter === undefined) {
             // If a there is no filter applied and the transfer is already in the list, we will update the Transfer element.
             if (transferList.some((e) => e.filepath === transfer.filepath))
@@ -92,7 +92,7 @@ function Transfers(): JSX.Element {
 }
 
 interface TransferInstanceProps {
-    transfer: Transfer
+    transfer: TransferTemplate
 }
 
 function TransferInstance(props: TransferInstanceProps): JSX.Element {

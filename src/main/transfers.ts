@@ -1,19 +1,14 @@
-/**
- * A Enum representing the status of a Transfer.
- * A transfer can be InQueue, Uploading, or Complete.
- */
-export enum TransferStatus {
-    InQueue,
-    Uploading,
-    Complete
-}
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { StoreSchema } from './store';
+import { TransferTemplate, TransferStatus } from '_/types/transfer';
+import fs from 'fs';
 
 /**
  * A class representing a file transfer to AWS S3.
  * It contains the filepath of the file being uploaded, the transfer's status, when the transfer was complete (if applicable), and a timeout used for delaying the transfer.
  * This class also has a static member used as a callback listner for invoking UI updates of the transfer list whenever an individual transfer is completed/updated/changed.
  */
-export default class Transfer {
+export default class Transfer implements TransferTemplate {
     // Static constants.
     private static readonly MILLISECONDS_PER_MINUTE = 60000;
     private static readonly MILLISECONDS_PER_SECOND = 1000;
@@ -21,7 +16,9 @@ export default class Transfer {
     // Static class members.
     private static transferList: Transfer[] = [];
     private static transferDelay: number;
-    private static updateListener: ((transfer: Transfer) => void) | undefined = undefined;
+    private static awsCredentials: StoreSchema['awsCredentials'];
+    private static client: S3Client;
+    private static updateListener: ((transfer: TransferTemplate) => void) | undefined = undefined;
     
     // Class members.
     filepath: string;
@@ -69,7 +66,7 @@ export default class Transfer {
      * Registers the update listener callback function that is called whenever a Transfer is updated.
      * @param callback the callback function that will be called whenever a Transfer is updated
      */
-    public static registerUpdateListener(callback: (transfer: Transfer) => void) {
+    public static registerUpdateListener(callback: (transfer: TransferTemplate) => void) {
         Transfer.updateListener = callback;
     }
 
@@ -89,6 +86,13 @@ export default class Transfer {
      */
     static updateTransferDelay(delay: number) {
         Transfer.transferDelay = delay;
+    }
+
+    static setAWSCredentials(credentials1: StoreSchema['awsCredentials']) {
+        Transfer.awsCredentials = credentials1;
+        Transfer.client = new S3Client({
+            region: this.awsCredentials.s3_awsRegion,
+        });
     }
 
     /**
@@ -118,7 +122,7 @@ export default class Transfer {
             Transfer.invokeTransferListUpdate(fileTransfer);
             fileTransfer.timeout = setTimeout(async () => {
                 await fileTransfer!.completeTransfer();
-            }, Transfer.transferDelay * Transfer.MILLISECONDS_PER_MINUTE);
+            }, Transfer.transferDelay * Transfer.MILLISECONDS_PER_SECOND);
         }
         else {
             await fileTransfer.completeTransfer();
@@ -150,8 +154,8 @@ export default class Transfer {
      * @param filter the filter to apply to the transfer list. Options include [All, InQueue, Uploading, Complete]
      * @returns the transfer list with the filter applied
      */
-    static getTransferList(filter: TransferStatus | undefined): Transfer[] {
-        let returnTransferList = Transfer.transferList;
+    static getTransferList(filter: TransferStatus | undefined): TransferTemplate[] {
+        let returnTransferList: TransferTemplate[] = Transfer.formatTransfers(Transfer.transferList);
         
         // Applies the given filter to the transfer list.
         if (filter === TransferStatus.InQueue)
@@ -161,18 +165,19 @@ export default class Transfer {
         else if (filter === TransferStatus.Complete)
             returnTransferList = returnTransferList.filter((transfer) => transfer.status === TransferStatus.Complete);
 
-        return Transfer.stripTimersFromTransferList(returnTransferList);
+        return returnTransferList;
     }
 
     /**
      * Strips the a given transfer list of any timer infromation as Electron will throw an exception if we try to send it over the IPC channels.
+     * Also casts the given transfer list to the type of TransferTemplate[].
      * @param list the transfer list to strip timer delay from
      * @returns the given transfer list without delay timers
      */
-    private static stripTimersFromTransferList(list: Transfer[]) {
+    private static formatTransfers(list: Transfer[]): TransferTemplate[] {
         return list.map((transfer) => {
             transfer.timeout = undefined;
-            return transfer;
-        });
+            return transfer as TransferTemplate;
+        })
     }
 }

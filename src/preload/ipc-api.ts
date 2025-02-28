@@ -1,7 +1,6 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { ipcRenderer, OpenDialogReturnValue } from 'electron';
 import Watcher from '_main/watcher';
-import Transfer, { TransferStatus } from '_main/transfers';
+import { TransferTemplate, TransferStatus } from '_/types/transfer';
 
 /** Notify main the renderer is ready. */
 function rendererReady() {
@@ -40,11 +39,11 @@ async function getAllWatchers(): Promise<Watcher[]> {
 
 
 // Transfer API
-async function getTransferList(filter: TransferStatus | undefined): Promise<Transfer[]> {
+async function getTransferList(filter: TransferStatus | undefined): Promise<TransferTemplate[]> {
     return await ipcRenderer.invoke('transfers:getTransfers', filter);
 }
 
-async function onUpdateTransfer(callback: (transfer: Transfer) => void) {
+async function onUpdateTransfer(callback: (transfer: TransferTemplate) => void) {
     ipcRenderer.on('transfers:update', (_event, transfer) => callback(transfer));
 }
 

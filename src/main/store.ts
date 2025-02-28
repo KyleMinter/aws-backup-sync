@@ -3,7 +3,7 @@ import Watcher from './watcher'
 import Transfer from './transfers';
 
 // Type definitions for the schema.
-type StoreSchema = {
+export type StoreSchema = {
     awsCredentials: {
         s3_BucketName: string;
         s3_ObjectKey: string;
@@ -76,7 +76,8 @@ const schema = {
 // Store instance which allows us to inerface with the file system.
 const store = new Store<StoreSchema>({ schema });
 
-// Set the initial transfer delay from the store.
+// Set the aws credentials and initial transfer delay from the store.
+Transfer.setAWSCredentials(store.get('awsCredentials') as StoreSchema['awsCredentials']);
 Transfer.updateTransferDelay(store.get('preferences').transferDelay);
 
 

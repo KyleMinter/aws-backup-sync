@@ -4,7 +4,8 @@ import { BrowserWindow, Tray, Menu, nativeImage, screen, app, ipcMain, dialog, s
 import * as nodeEnv from '_utils/node-env';
 import * as store from './store';
 import Watcher from './watcher';
-import Transfer, { TransferStatus } from './transfers';
+import Transfer from './transfers';
+import { TransferTemplate, TransferStatus } from '_/types/transfer';
 
 let singleInstanceLock: boolean;
 let tray: Electron.Tray | undefined;
@@ -165,7 +166,7 @@ ipcMain.handle('watcher:getAll', () => {
 ipcMain.handle('transfers:getTransfers', (_event, filter: TransferStatus | undefined) => {
     return Transfer.getTransferList(filter);
 });
-function invokeUpdateTransfersEvent(transfer: Transfer) {
+function invokeUpdateTransfersEvent(transfer: TransferTemplate) {
     window?.webContents.send('transfers:update', transfer);
 }
 
