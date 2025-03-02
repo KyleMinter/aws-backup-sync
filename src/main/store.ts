@@ -6,8 +6,9 @@ import Transfer from './transfers';
 export type StoreSchema = {
     awsCredentials: {
         s3_BucketName: string;
-        s3_ObjectKey: string;
-        s3_awsRegion: string;
+        iam_accessKeyId: string;
+        iam_secretAccessKey: string;
+        awsRegion: string;
     },
     preferences: {
         openOnStartup: boolean;
@@ -25,11 +26,15 @@ const schema = {
                 type: 'string',
                 default: 'S3 Bucket Name'
             },
-            s3_ObjectKey: {
+            iam_accessKeyId: {
                 type: 'string',
-                default: 'S3 Object Key'
+                default: 'IAM Access Key ID'
             },
-            s3_awsRegion: {
+            iam_secretAccessKey: {
+                type: 'string',
+                default: 'IAM Secret Access Key'
+            },
+            awsRegion: {
                 type: 'string',
                 default: 'AWS Region'
             },

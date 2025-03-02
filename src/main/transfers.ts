@@ -88,10 +88,14 @@ export default class Transfer implements TransferTemplate {
         Transfer.transferDelay = delay;
     }
 
-    static setAWSCredentials(credentials1: StoreSchema['awsCredentials']) {
-        Transfer.awsCredentials = credentials1;
+    static setAWSCredentials(credentials: StoreSchema['awsCredentials']) {
+        Transfer.awsCredentials = credentials;
         Transfer.client = new S3Client({
-            region: this.awsCredentials.s3_awsRegion,
+            region: this.awsCredentials.awsRegion,
+            credentials: {
+                accessKeyId: this.awsCredentials.iam_accessKeyId,
+                secretAccessKey: this.awsCredentials.iam_secretAccessKey
+            }
         });
     }
 
@@ -122,7 +126,7 @@ export default class Transfer implements TransferTemplate {
             Transfer.invokeTransferListUpdate(fileTransfer);
             fileTransfer.timeout = setTimeout(async () => {
                 await fileTransfer!.completeTransfer();
-            }, Transfer.transferDelay * Transfer.MILLISECONDS_PER_SECOND);
+            }, Transfer.transferDelay * Transfer.MILLISECONDS_PER_MINUTE);
         }
         else {
             await fileTransfer.completeTransfer();

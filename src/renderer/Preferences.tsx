@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from 'react';
+import { StoreSchema } from '_/main/store';
 
 function Preferences(): JSX.Element {
     const [didFetch, setDidFetch] = useState<boolean>(false);
 
     const [s3_BucketName, setS3BucketName] = useState<{value: string, stored: string}>();
-    const [s3_ObjectKey, setS3ObjectKey] = useState<{value: string, stored: string}>();
-    const [s3_awsRegion, setS3AWSRegion] = useState<{value: string, stored: string}>();
+    const [iam_accessKeyId, setIAMAccessKeyId] = useState<{value: string, stored: string}>();
+    const [iam_secretAccessKey, setIAMSecretAccessKey] = useState<{value: string, stored: string}>();
+    const [awsRegion, setAWSRegion] = useState<{value: string, stored: string}>();
 
     const [openOnStartup, setOpenOnStartup] = useState<{value: boolean, stored: boolean}>();
     const [transferDelay, setTransferDelay] = useState<{value: number, stored: number}>();
 
-    const preferences = [s3_BucketName, s3_ObjectKey, s3_awsRegion, openOnStartup, transferDelay];
+    const preferences = [s3_BucketName, iam_accessKeyId, iam_secretAccessKey, awsRegion, openOnStartup, transferDelay];
 
     useEffect(() => {
         if (!didFetch) {
@@ -25,8 +27,9 @@ function Preferences(): JSX.Element {
     async function fetchPreferences() {
         const awsCredentials = await window.ipcAPI?.storeGet('awsCredentials');
         setS3BucketName({value: awsCredentials.s3_BucketName, stored: awsCredentials.s3_BucketName});
-        setS3ObjectKey({value: awsCredentials.s3_ObjectKey, stored: awsCredentials.s3_ObjectKey});
-        setS3AWSRegion({value: awsCredentials.s3_awsRegion, stored: awsCredentials.s3_awsRegion});
+        setIAMAccessKeyId({value: awsCredentials.iam_accessKeyId, stored: awsCredentials.iam_accessKeyId});
+        setIAMSecretAccessKey({value: awsCredentials.iam_secretAccessKey, stored: awsCredentials.iam_secretAccessKey})
+        setAWSRegion({value: awsCredentials.awsRegion, stored: awsCredentials.awsRegion});
 
         const preferences = await window.ipcAPI?.storeGet('preferences');
         setOpenOnStartup({value: preferences.openOnStartup, stored: preferences.openOnStartup});
@@ -39,8 +42,9 @@ function Preferences(): JSX.Element {
     async function savePreferences() {
         const awsCredentials = {
             s3_BucketName: s3_BucketName?.value,
-            s3_ObjectKey: s3_ObjectKey?.value,
-            s3_awsRegion: s3_awsRegion?.value
+            iam_accessKeyId: iam_accessKeyId?.value,
+            iam_secretAccessKey: iam_secretAccessKey?.value,
+            awsRegion: awsRegion?.value
         };
         await window.ipcAPI?.storeSet('awsCredentials', awsCredentials);
 
@@ -85,8 +89,9 @@ function Preferences(): JSX.Element {
      */
     function resetPreferences() {
         resetPreference(s3_BucketName!, setS3BucketName);
-        resetPreference(s3_ObjectKey!, setS3ObjectKey);
-        resetPreference(s3_awsRegion!, setS3AWSRegion);
+        resetPreference(iam_accessKeyId!, setIAMAccessKeyId);
+        resetPreference(iam_secretAccessKey!, setIAMSecretAccessKey)
+        resetPreference(awsRegion!, setAWSRegion);
         resetPreference(openOnStartup!, setOpenOnStartup);
         resetPreference(transferDelay!, setTransferDelay);
     }
@@ -111,22 +116,32 @@ function Preferences(): JSX.Element {
                     </label>
                     <br />
                     <label className="preferences-label">
-                        <div>S3 Object Key: {s3_ObjectKey?.value !== s3_ObjectKey?.stored && <span>*</span>}</div>
+                        <div>IAM Access Key ID: {iam_accessKeyId?.value !== iam_accessKeyId?.stored && <span>*</span>}</div>
                         <input
                             type="text"
-                            value={s3_ObjectKey?.value}
-                            onChange={(e) => handlePreferenceChange(e.target.value, s3_ObjectKey!, setS3ObjectKey)}
-                            onBlur={() => validateAWSCredential(s3_ObjectKey!, setS3ObjectKey)}
+                            value={iam_accessKeyId?.value}
+                            onChange={(e) => handlePreferenceChange(e.target.value, iam_accessKeyId!, setIAMAccessKeyId)}
+                            onBlur={() => validateAWSCredential(iam_accessKeyId!, setIAMAccessKeyId)}
                         />
                     </label>
                     <br />
                     <label className="preferences-label">
-                        <div>AWS Region: {s3_awsRegion?.value !== s3_awsRegion?.stored && <span>*</span>}</div>
+                        <div>IAM Secret Access Key: {iam_secretAccessKey?.value !== iam_secretAccessKey?.stored && <span>*</span>}</div>
+                        <input
+                            type="text"
+                            value={iam_secretAccessKey?.value}
+                            onChange={(e) => handlePreferenceChange(e.target.value, iam_secretAccessKey!, setIAMSecretAccessKey)}
+                            onBlur={() => validateAWSCredential(iam_secretAccessKey!, setIAMSecretAccessKey)}
+                        />
+                    </label>
+                    <br />
+                    <label className="preferences-label">
+                        <div>AWS Region: {awsRegion?.value !== awsRegion?.stored && <span>*</span>}</div>
                         <input
                         type="text"
-                        value={s3_awsRegion?.value}
-                        onChange={(e) => handlePreferenceChange(e.target.value, s3_awsRegion!, setS3AWSRegion)}
-                        onBlur={() => validateAWSCredential(s3_awsRegion!, setS3AWSRegion)} 
+                        value={awsRegion?.value}
+                        onChange={(e) => handlePreferenceChange(e.target.value, awsRegion!, setAWSRegion)}
+                        onBlur={() => validateAWSCredential(awsRegion!, setAWSRegion)} 
                     />
                     </label>
                 </form>
