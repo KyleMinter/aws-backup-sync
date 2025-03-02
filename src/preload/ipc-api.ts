@@ -56,4 +56,8 @@ async function openFileDialog(): Promise<OpenDialogReturnValue> {
     return await ipcRenderer.invoke('electron:openFileDialog');
 }
 
-export default { rendererReady, storeGet, storeSet, addWatcherInstance, removeWatcherInstance, toggleWatcherInstance, getAllWatchers, getTransferList, onUpdateTransfer, onUpdateNavbar, openFileDialog };
+async function getErrorLogLocation(): Promise<string> {
+    return await ipcRenderer.invoke('electron:errorLog');
+}
+
+export default { rendererReady, storeGet, storeSet, addWatcherInstance, removeWatcherInstance, toggleWatcherInstance, getAllWatchers, getTransferList, onUpdateTransfer, onUpdateNavbar, openFileDialog, getErrorLogLocation };

@@ -2,6 +2,7 @@ import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { StoreSchema } from './store';
 import { TransferTemplate, TransferStatus } from '_/types/transfer';
 import fs from 'fs';
+import path from 'path';
 
 /**
  * A class representing a file transfer to AWS S3.
@@ -16,9 +17,10 @@ export default class Transfer implements TransferTemplate {
     // Static class members.
     private static transferList: Transfer[] = [];
     private static transferDelay: number;
-    private static awsCredentials: StoreSchema['awsCredentials'];
+    private static s3_BucketName: string;
     private static client: S3Client;
-    private static updateListener: ((transfer: TransferTemplate) => void) | undefined = undefined;
+    public static updateListener: ((transfer: TransferTemplate) => void) | undefined = undefined;
+    public static logFilePath: string;
     
     // Class members.
     filepath: string;
@@ -42,15 +44,41 @@ export default class Transfer implements TransferTemplate {
      * The status of the transfer is updated while completing the transfer process and the date/time it was completed is update upon it finishing.
      */
     public async completeTransfer() {
+        // Set the status of the transfer to "Uploading" and invoke an UI update.
         this.status = TransferStatus.Uploading;
         Transfer.invokeTransferListUpdate(this);
-        
-        // do aws transfer stuff
-        console.log(`uploading ${this.filepath} to AWS`);
 
-        this.status = TransferStatus.Complete;
-        this.dateCompleted = new Date();
-        Transfer.invokeTransferListUpdate(this);
+        // Create a read stream and construct the params for the AWS client command.
+        const readStream = fs.createReadStream(this.filepath);
+        const params = {
+            'Body': readStream,
+            'Bucket': Transfer.s3_BucketName,
+            'Key': this.filepath,
+        };
+
+        try {
+            // Attempt to upload the file to S3.
+            const command = new PutObjectCommand(params);
+            await Transfer.client.send(command);
+
+            // Set the status of the transfer to "Complete" and set the date completed of the transfer.
+            this.status = TransferStatus.Complete;
+            this.dateCompleted = new Date();
+        }
+        catch (error) {
+            // In the event of something going wrong with the file being uploaded to S3, we will set the status of the transfer to "Error."
+            this.status = TransferStatus.Error;
+
+            // Append the error message to the log with a timestamp.
+            const timestamp = new Date();
+            const errorLog = `${this.filepath}\n${timestamp}\n${error}\n----------------------------------------------------------------------------------------\n`;
+            fs.appendFile(Transfer.logFilePath, errorLog, (_err) => {});
+
+        }
+        finally {
+            // Invoke an UI update since we've since changed the status of the transfer.
+            Transfer.invokeTransferListUpdate(this);
+        }
     }
 
     /**
@@ -60,14 +88,6 @@ export default class Transfer implements TransferTemplate {
     public cancelDelayTimer() {
         if (this.timeout)
             clearTimeout(this.timeout);
-    }
-
-    /**
-     * Registers the update listener callback function that is called whenever a Transfer is updated.
-     * @param callback the callback function that will be called whenever a Transfer is updated
-     */
-    public static registerUpdateListener(callback: (transfer: TransferTemplate) => void) {
-        Transfer.updateListener = callback;
     }
 
     /**
@@ -88,13 +108,17 @@ export default class Transfer implements TransferTemplate {
         Transfer.transferDelay = delay;
     }
 
+    /**
+     * Sets the credentials for the AWS client.
+     * @param credentials an object containing all of the credentials
+     */
     static setAWSCredentials(credentials: StoreSchema['awsCredentials']) {
-        Transfer.awsCredentials = credentials;
+        Transfer.s3_BucketName = credentials.s3_BucketName;
         Transfer.client = new S3Client({
-            region: this.awsCredentials.awsRegion,
+            region: credentials.awsRegion,
             credentials: {
-                accessKeyId: this.awsCredentials.iam_accessKeyId,
-                secretAccessKey: this.awsCredentials.iam_secretAccessKey
+                accessKeyId: credentials.iam_accessKeyId,
+                secretAccessKey: credentials.iam_secretAccessKey
             }
         });
     }
@@ -155,7 +179,7 @@ export default class Transfer implements TransferTemplate {
 
     /**
      * Returns the transfer list with a specified filter for the transfer status applied.
-     * @param filter the filter to apply to the transfer list. Options include [All, InQueue, Uploading, Complete]
+     * @param filter the filter to apply to the transfer list. Options include [All, InQueue, Uploading, Complete, Error]
      * @returns the transfer list with the filter applied
      */
     static getTransferList(filter: TransferStatus | undefined): TransferTemplate[] {
@@ -168,6 +192,8 @@ export default class Transfer implements TransferTemplate {
             returnTransferList = returnTransferList.filter((transfer) => transfer.status === TransferStatus.Uploading);
         else if (filter === TransferStatus.Complete)
             returnTransferList = returnTransferList.filter((transfer) => transfer.status === TransferStatus.Complete);
+        else if (filter === TransferStatus.Error)
+            returnTransferList = returnTransferList.filter((transfer) => transfer.status === TransferStatus.Error);
 
         return returnTransferList;
     }

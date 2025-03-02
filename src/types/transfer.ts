@@ -1,11 +1,12 @@
 /**
  * A Enum representing the status of a Transfer.
- * A transfer can be InQueue, Uploading, or Complete.
+ * A transfer can be InQueue, Uploading, Complete, or Error.
  */
 export enum TransferStatus {
     InQueue,
     Uploading,
-    Complete
+    Complete,
+    Error
 }
 
 /**

@@ -11,6 +11,7 @@ let singleInstanceLock: boolean;
 let tray: Electron.Tray | undefined;
 let window: Electron.BrowserWindow | undefined;
 let isAppQuitting = false;
+const errorLog = path.join(app.getPath('userData'), 'aws-backup-sync-errorlog.txt');
 
 /**
  * Creates the tray icon for the application.
@@ -122,7 +123,8 @@ app.whenReady().then(async () => {
     createTray();
 
     // Register the update listener for the transfers and initialize the watchers.
-    Transfer.registerUpdateListener(invokeUpdateTransfersEvent);
+    Transfer.updateListener = invokeUpdateTransfersEvent;
+    Transfer.logFilePath = errorLog;
     Watcher.initializeWatchers();
 });
 
@@ -169,6 +171,9 @@ ipcMain.handle('transfers:getTransfers', (_event, filter: TransferStatus | undef
 function invokeUpdateTransfersEvent(transfer: TransferTemplate) {
     window?.webContents.send('transfers:update', transfer);
 }
+ipcMain.handle('electron:errorLog', () => {
+    return app.getPath('userData');
+})
 
 // IPC handle for electron related functions
 function invokeNavbarUpdateEvent(active: string) {

@@ -48,3 +48,8 @@
 .transfers-empty {
     text-align: center;
 }
+
+.transfers-error {
+    text-align: center;
+    color: red !important;
+}
